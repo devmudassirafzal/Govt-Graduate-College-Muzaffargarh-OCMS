@@ -1,0 +1,1605 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/hgzapcr6",
+    "id": "hgzapcr6",
+    "slide": 13,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "DEFAULT",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "backgroundColor": "#FFFFFF",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "Office",
+    "colors": {
+      "accent1": "#4472C4",
+      "accent2": "#ED7D31",
+      "accent3": "#A5A5A5",
+      "accent4": "#FFC000",
+      "accent5": "#5B9BD5",
+      "accent6": "#70AD47",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#44546A",
+      "lt2": "#E7E6E6",
+      "hlink": "#0563C1",
+      "folHlink": "#954F72"
+    },
+    "fontScheme": {
+      "name": "Office",
+      "majorFont": {
+        "latinTypeface": "Calibri Light"
+      },
+      "minorFont": {
+        "latinTypeface": "Calibri"
+      }
+    },
+    "typefaces": [
+      "Calibri",
+      "Calibri Light",
+      "Cambria"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "DEFAULT",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/q50nydsj",
+      "id": "2",
+      "name": "Shape 0",
+      "bbox": [
+        52.8,
+        59.52,
+        15.36,
+        15.36
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#00A896"
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/bq9orito",
+      "id": "3",
+      "name": "Text 1",
+      "bbox": [
+        76.8,
+        48,
+        768,
+        33.6
+      ],
+      "geometry": "rect",
+      "text": "MODULE 8 — LIBRARY & COMMITTEES",
+      "textPreview": "MODULE 8 — LIBRARY & COMMITTEES",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "MODULE 8 — LIBRARY & COMMITTEES"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "MODULE 8 — LIBRARY & COMMITTEES",
+          "runs": [
+            {
+              "index": 1,
+              "text": "MODULE 8 — LIBRARY & COMMITTEES",
+              "fontSize": 16,
+              "typeface": "Calibri",
+              "color": "#1C7293",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/o3i5w3ad",
+      "id": "4",
+      "name": "Text 2",
+      "bbox": [
+        48,
+        78.72,
+        912,
+        72
+      ],
+      "geometry": "rect",
+      "text": "Digital Library & Committees",
+      "textPreview": "Digital Library & Committees",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Digital Library & Committees"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Digital Library & Committees",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Digital Library & Committees",
+              "fontSize": 40,
+              "typeface": "Cambria",
+              "color": "#13294B",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/p4r6p8by",
+      "id": "5",
+      "name": "Shape 3",
+      "bbox": [
+        972.77,
+        43.2,
+        259.2,
+        38.4
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#F4F7FA",
+      "lineColor": "#CADCFC",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/21gnuts7",
+      "id": "6",
+      "name": "Shape 4",
+      "bbox": [
+        985.25,
+        52.8,
+        19.2,
+        19.2
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#00A896"
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/32ponyts",
+      "id": "7",
+      "name": "Text 5",
+      "bbox": [
+        1011.17,
+        43.2,
+        211.2,
+        38.4
+      ],
+      "geometry": "rect",
+      "text": "Presenter  Muhammad Mudassir",
+      "textPreview": "Presenter  Muhammad Mudassir",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Presenter  Muhammad Mudassir"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Presenter  Muhammad Mudassir",
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Presenter  ",
+              "fontSize": 11.33,
+              "typeface": "Calibri",
+              "color": "#5A6B7B"
+            },
+            {
+              "index": 2,
+              "text": "Muhammad Mudassir",
+              "fontSize": 12.67,
+              "typeface": "Calibri",
+              "color": "#13294B",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/gzy5s3a1",
+      "id": "8",
+      "name": "Shape 6",
+      "bbox": [
+        67.2,
+        187.2,
+        561.6,
+        475.2
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#F4F7FA",
+      "lineColor": "#CADCFC",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1076lobm",
+      "id": "9",
+      "name": "Shape 7",
+      "bbox": [
+        96,
+        216,
+        67.2,
+        67.2
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#13294B"
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/hcfy9k3u",
+      "id": "10",
+      "name": "Text 8",
+      "bbox": [
+        96,
+        216,
+        67.2,
+        67.2
+      ],
+      "geometry": "rect",
+      "text": "☷",
+      "textPreview": "☷",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "☷"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "☷",
+          "resolvedTextStyle": {
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "☷",
+              "fontSize": 34.67,
+              "typeface": "Calibri",
+              "color": "#00A896"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/gb6x0zm9",
+      "id": "11",
+      "name": "Text 9",
+      "bbox": [
+        177.6,
+        222.72,
+        432,
+        52.8
+      ],
+      "geometry": "rect",
+      "text": "Digital Library",
+      "textPreview": "Digital Library",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Digital Library"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Digital Library",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Digital Library",
+              "fontSize": 29.33,
+              "typeface": "Cambria",
+              "color": "#13294B",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/vaxg7ulo",
+      "id": "12",
+      "name": "Shape 10",
+      "bbox": [
+        100.8,
+        317.76,
+        15.36,
+        15.36
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#00A896"
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/u9ofyp43",
+      "id": "13",
+      "name": "Text 11",
+      "bbox": [
+        129.6,
+        307.2,
+        480,
+        33.6
+      ],
+      "geometry": "rect",
+      "text": "Book Catalog",
+      "textPreview": "Book Catalog",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Book Catalog"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Book Catalog",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Book Catalog",
+              "fontSize": 18.67,
+              "typeface": "Calibri",
+              "color": "#1F2A37",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/t8fy5k3i",
+      "id": "14",
+      "name": "Text 12",
+      "bbox": [
+        129.6,
+        338.88,
+        480,
+        48
+      ],
+      "geometry": "rect",
+      "text": "Books organised by category with copies tracked.",
+      "textPreview": "Books organised by category with copies tracked.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Books organised by category with copies tracked."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Books organised by category with copies tracked.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Books organised by category with copies tracked.",
+              "fontSize": 14.67,
+              "typeface": "Calibri",
+              "color": "#5A6B7B"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/876xwfmx",
+      "id": "15",
+      "name": "Shape 13",
+      "bbox": [
+        100.8,
+        402.24,
+        15.36,
+        15.36
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#00A896"
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7mdg3als",
+      "id": "16",
+      "name": "Text 14",
+      "bbox": [
+        129.6,
+        391.68,
+        480,
+        33.6
+      ],
+      "geometry": "rect",
+      "text": "Book Requests",
+      "textPreview": "Book Requests",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Book Requests"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Book Requests",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Book Requests",
+              "fontSize": 18.67,
+              "typeface": "Calibri",
+              "color": "#1F2A37",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/6l4fu547",
+      "id": "17",
+      "name": "Text 15",
+      "bbox": [
+        129.6,
+        423.36,
+        480,
+        48
+      ],
+      "geometry": "rect",
+      "text": "Students request a book; the librarian approves.",
+      "textPreview": "Students request a book; the librarian approves.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Students request a book; the librarian approves."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Students request a book; the librarian approves.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Students request a book; the librarian approves.",
+              "fontSize": 14.67,
+              "typeface": "Calibri",
+              "color": "#5A6B7B"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lkvy103m",
+      "id": "18",
+      "name": "Shape 16",
+      "bbox": [
+        100.8,
+        486.72,
+        15.36,
+        15.36
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#00A896"
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kjmxsfm1",
+      "id": "19",
+      "name": "Text 17",
+      "bbox": [
+        129.6,
+        476.16,
+        480,
+        33.6
+      ],
+      "geometry": "rect",
+      "text": "Issue & Return",
+      "textPreview": "Issue & Return",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Issue & Return"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Issue & Return",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Issue & Return",
+              "fontSize": 18.67,
+              "typeface": "Calibri",
+              "color": "#1F2A37",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/cnqh8fux",
+      "id": "20",
+      "name": "Text 18",
+      "bbox": [
+        129.6,
+        507.84,
+        480,
+        48
+      ],
+      "geometry": "rect",
+      "text": "The librarian issues and returns books at the desk.",
+      "textPreview": "The librarian issues and returns books at the desk.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "The librarian issues and returns books at the desk."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "The librarian issues and returns books at the desk.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "The librarian issues and returns books at the desk.",
+              "fontSize": 14.67,
+              "typeface": "Calibri",
+              "color": "#5A6B7B"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/xozyhkbi",
+      "id": "21",
+      "name": "Shape 19",
+      "bbox": [
+        100.8,
+        571.2,
+        15.36,
+        15.36
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#00A896"
+    },
+    {
+      "order": 21,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/q18f65cr",
+      "id": "22",
+      "name": "Text 20",
+      "bbox": [
+        129.6,
+        560.64,
+        480,
+        33.6
+      ],
+      "geometry": "rect",
+      "text": "Student View",
+      "textPreview": "Student View",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Student View"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Student View",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Student View",
+              "fontSize": 18.67,
+              "typeface": "Calibri",
+              "color": "#1F2A37",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 22,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/bmhgfatc",
+      "id": "23",
+      "name": "Text 21",
+      "bbox": [
+        129.6,
+        592.32,
+        480,
+        48
+      ],
+      "geometry": "rect",
+      "text": "Students see their requested and issued books.",
+      "textPreview": "Students see their requested and issued books.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Students see their requested and issued books."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Students see their requested and issued books.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Students see their requested and issued books.",
+              "fontSize": 14.67,
+              "typeface": "Calibri",
+              "color": "#5A6B7B"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 23,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/oz6x4vul",
+      "id": "24",
+      "name": "Shape 22",
+      "bbox": [
+        648,
+        187.2,
+        561.6,
+        475.2
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#13294B"
+    },
+    {
+      "order": 24,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/p0zyd0b6",
+      "id": "25",
+      "name": "Shape 23",
+      "bbox": [
+        676.8,
+        216,
+        67.2,
+        67.2
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#00A896"
+    },
+    {
+      "order": 25,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2xof2lcv",
+      "id": "26",
+      "name": "Text 24",
+      "bbox": [
+        676.8,
+        216,
+        67.2,
+        67.2
+      ],
+      "geometry": "rect",
+      "text": "⚑",
+      "textPreview": "⚑",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "⚑"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "⚑",
+          "resolvedTextStyle": {
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "⚑",
+              "fontSize": 34.67,
+              "typeface": "Calibri",
+              "color": "#13294B",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 26,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/3yxgbqdg",
+      "id": "27",
+      "name": "Text 25",
+      "bbox": [
+        758.4,
+        222.72,
+        432,
+        52.8
+      ],
+      "geometry": "rect",
+      "text": "Committees",
+      "textPreview": "Committees",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Committees"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Committees",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Committees",
+              "fontSize": 29.33,
+              "typeface": "Cambria",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 27,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8vahgzu5",
+      "id": "28",
+      "name": "Text 26",
+      "bbox": [
+        676.8,
+        302.4,
+        508.8,
+        81.6
+      ],
+      "geometry": "rect",
+      "text": "The college runs many committees — sports, discipline, functions and more. This module keeps them organised.",
+      "textPreview": "The college runs many committees — sports, discipline, functions and more. This module keeps them organised.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "The college runs many committees — sports, discipline, functions and"
+          },
+          {
+            "index": 2,
+            "text": "more. This module keeps them organised."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "The college runs many committees — sports, discipline, functions and more. This module keeps them organised.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "The college runs many committees — sports, discipline, functions and more. This module keeps them organised.",
+              "fontSize": 16.67,
+              "typeface": "Calibri",
+              "color": "#CADCFC"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 28,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9wjyp4bq",
+      "id": "29",
+      "name": "Shape 27",
+      "bbox": [
+        681.6,
+        404.16,
+        15.36,
+        15.36
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#00A896"
+    },
+    {
+      "order": 29,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/jqlkfyds",
+      "id": "30",
+      "name": "Text 28",
+      "bbox": [
+        710.4,
+        393.6,
+        480,
+        33.6
+      ],
+      "geometry": "rect",
+      "text": "Create committees",
+      "textPreview": "Create committees",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Create committees"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Create committees",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Create committees",
+              "fontSize": 18.67,
+              "typeface": "Calibri",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 30,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ipcjmtw7",
+      "id": "31",
+      "name": "Text 29",
+      "bbox": [
+        710.4,
+        425.28,
+        480,
+        48
+      ],
+      "geometry": "rect",
+      "text": "Set up a committee with its purpose.",
+      "textPreview": "Set up a committee with its purpose.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Set up a committee with its purpose."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Set up a committee with its purpose.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Set up a committee with its purpose.",
+              "fontSize": 14.67,
+              "typeface": "Calibri",
+              "color": "#CADCFC"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 31,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5cn2h8vy",
+      "id": "32",
+      "name": "Shape 30",
+      "bbox": [
+        681.6,
+        488.64,
+        15.36,
+        15.36
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#00A896"
+    },
+    {
+      "order": 32,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/4re1o3ed",
+      "id": "33",
+      "name": "Text 31",
+      "bbox": [
+        710.4,
+        478.08,
+        480,
+        33.6
+      ],
+      "geometry": "rect",
+      "text": "Add members",
+      "textPreview": "Add members",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Add members"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Add members",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Add members",
+              "fontSize": 18.67,
+              "typeface": "Calibri",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 33,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/re5kjydo",
+      "id": "34",
+      "name": "Text 32",
+      "bbox": [
+        710.4,
+        509.76,
+        480,
+        48
+      ],
+      "geometry": "rect",
+      "text": "Assign staff and student members to it.",
+      "textPreview": "Assign staff and student members to it.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Assign staff and student members to it."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Assign staff and student members to it.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Assign staff and student members to it.",
+              "fontSize": 14.67,
+              "typeface": "Calibri",
+              "color": "#CADCFC"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 34,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/6dwjqtw3",
+      "id": "35",
+      "name": "Shape 33",
+      "bbox": [
+        681.6,
+        573.12,
+        15.36,
+        15.36
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#00A896"
+    },
+    {
+      "order": 35,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/tgn2l8vu",
+      "id": "36",
+      "name": "Text 34",
+      "bbox": [
+        710.4,
+        562.56,
+        480,
+        33.6
+      ],
+      "geometry": "rect",
+      "text": "Track roles",
+      "textPreview": "Track roles",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Track roles"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Track roles",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Track roles",
+              "fontSize": 18.67,
+              "typeface": "Calibri",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 36,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/sfe1s3e9",
+      "id": "37",
+      "name": "Text 35",
+      "bbox": [
+        710.4,
+        594.24,
+        480,
+        48
+      ],
+      "geometry": "rect",
+      "text": "Record who leads and serves on each.",
+      "textPreview": "Record who leads and serves on each.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Record who leads and serves on each."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Record who leads and serves on each.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Record who leads and serves on each.",
+              "fontSize": 14.67,
+              "typeface": "Calibri",
+              "color": "#CADCFC"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    }
+  ],
+  "composeRuns": []
+}
