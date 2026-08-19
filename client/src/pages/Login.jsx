@@ -201,7 +201,7 @@ export default function Login() {
                 >
                   {ROLES.map((r) => (
                     <option key={r.key} value={r.key}>
-                      {r.icon} {r.label}
+                      {r.label}
                     </option>
                   ))}
                 </select>
