@@ -119,26 +119,30 @@ export function Badge({ value }) {
   );
 }
 
-export function Table({ columns, rows, empty = 'Nothing here yet.', onRowClick }) {
-  if (!rows?.length) return <EmptyState label={empty} />;
+export function Table({ columns = [], rows = [], empty = 'Nothing here yet.', onRowClick }) {
+  const safeCols = Array.isArray(columns) ? columns : [];
+  const safeRows = Array.isArray(rows) ? rows : [];
+  if (!safeRows.length) return <EmptyState label={empty} />;
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
-            {columns.map((c) => <th key={c.header} className="py-2 pr-4">{c.header}</th>)}
+            {safeCols.map((c) => <th key={c.header} className="py-2 pr-4">{c.header}</th>)}
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, i) => (
+          {safeRows.map((row, i) => (
             <tr
               key={row.id ?? i}
               onClick={() => onRowClick && onRowClick(row)}
               className={`border-b border-slate-100 last:border-0 hover:bg-slate-50 ${onRowClick ? 'cursor-pointer hover:bg-slate-100/50' : ''}`}
             >
-              {columns.map((c) => (
-                <td key={c.header} className="py-2.5 pr-4 align-middle">{c.cell(row)}</td>
-              ))}
+              {safeCols.map((c) => {
+                let content = '—';
+                try { content = c.cell(row); } catch (e) { console.error('Table cell render error:', e); content = 'Error'; }
+                return <td key={c.header} className="py-2.5 pr-4 align-middle">{content}</td>;
+              })}
             </tr>
           ))}
         </tbody>

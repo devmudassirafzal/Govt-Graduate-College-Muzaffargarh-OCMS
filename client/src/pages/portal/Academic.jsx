@@ -176,7 +176,7 @@ export default function Academic() {
           <Table columns={[
             { header: 'Code', cell: (x) => <span className="font-semibold text-primary">{x.code}</span> },
             { header: 'Name', cell: (x) => x.name },
-            { header: 'HOD', cell: (x) => x.hod?.name ?? '—' },
+            { header: 'HOD', cell: (x) => x.teacher?.name ?? '—' },
             { header: 'Teachers', cell: (x) => x._count.teachers },
             { header: 'Programs', cell: (x) => x._count.programs },
             { header: 'Actions', cell: (x) => <RowActions allowed={canDept} onEdit={() => openEdit('department', x)} deleteUrl={`/academic/departments/${x.id}`} label="Department" /> },
@@ -193,9 +193,9 @@ export default function Academic() {
             { header: 'Level', cell: (x) => <Badge value={x.level} /> },
             { header: 'Seats', cell: (x) => x.seats },
             { header: 'Min %', cell: (x) => Number(x.minPercentage) },
-            { header: 'Eligible groups', cell: (x) => x.level === 'bs' ? x.eligibilities.map((e) => e.interGroup.code).join(', ') : x.interGroup?.name ?? '—' },
+            { header: 'Eligible groups', cell: (x) => x.level === 'bs' ? (x.programEligibilities || []).map((e) => e.interGroup.code).join(', ') : x.interGroup?.name ?? '—' },
             { header: 'Active', cell: (x) => <Badge value={x.isActive ? 'active' : 'closed'} /> },
-            { header: 'Actions', cell: (x) => <RowActions onEdit={() => openEdit('program', { ...x, eligibleGroupIds: x.eligibilities.map((e) => e.interGroupId) })} deleteUrl={`/academic/programs/${x.id}`} label="Program" /> },
+            { header: 'Actions', cell: (x) => <RowActions onEdit={() => openEdit('program', { ...x, eligibleGroupIds: (x.programEligibilities || []).map((e) => e.interGroupId) })} deleteUrl={`/academic/programs/${x.id}`} label="Program" /> },
           ]} rows={d.programs} />
         </Card>
       )}
