@@ -148,30 +148,7 @@ export default function Login() {
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-1 text-lg font-semibold text-slate-800">Portal Login</h2>
-          <p className="mb-4 text-sm text-slate-500">Select your role to sign in</p>
-
-          <div className="mb-5">
-            <label className="mb-1 block text-sm font-medium text-slate-700">Select Role</label>
-            <div className="relative">
-              <select
-                value={activeRole}
-                onChange={(e) => selectRole(e.target.value)}
-                className="w-full appearance-none rounded-lg border border-slate-300 bg-white py-2 pl-3 pr-10 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              >
-                {ROLES.map((r) => (
-                  <option key={r.key} value={r.key}>
-                    {r.icon} {r.label}
-                  </option>
-                ))}
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                <svg className="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-          </div>
+          <h2 className="mb-4 text-lg font-semibold text-slate-800">Portal Login</h2>
 
           <form
             onSubmit={handleSubmit}
@@ -213,6 +190,28 @@ export default function Login() {
               className="mb-4 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               placeholder="••••••••"
             />
+
+            <div className="mb-5">
+              <label className="mb-1 block text-sm font-medium text-slate-700">Select Role</label>
+              <div className="relative">
+                <select
+                  value={activeRole}
+                  onChange={(e) => selectRole(e.target.value)}
+                  className="w-full appearance-none rounded-lg border border-slate-300 bg-white py-2 pl-3 pr-10 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                >
+                  {ROLES.map((r) => (
+                    <option key={r.key} value={r.key}>
+                      {r.icon} {r.label}
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                  <svg className="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+            </div>
 
             <button
               type="submit"
