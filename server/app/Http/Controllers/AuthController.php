@@ -70,8 +70,26 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
+        $user = $request->user()->load(['roles.permissions', 'permissions']);
+
+        $userRoles = $user->roles->pluck('name')->toArray();
+
+        $rolePermissions = $user->roles->flatMap(function($r) {
+            return $r->permissions->pluck('name');
+        })->toArray();
+        
+        $directPermissions = $user->permissions->pluck('name')->toArray();
+        $allPermissions = array_values(array_unique(array_merge($rolePermissions, $directPermissions)));
+
         return response()->json([
-            'user' => array_merge($request->user()->toArray(), ['id' => (string)$request->user()->id])
+            'user' => [
+                'id' => (string) $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'mustChangePassword' => $user->must_change_password,
+                'roles' => $userRoles,
+                'permissions' => $allPermissions
+            ]
         ]);
     }
 }
