@@ -107,6 +107,10 @@ $composerOk = $false
 $composer = Get-Command composer -ErrorAction SilentlyContinue
 if ($composer) { OK "Composer found"; $composerOk = $true }
 else { Warn "Composer is missing. Please install Composer." }
+$nodeOk = $false
+$node = Get-Command node -ErrorAction SilentlyContinue
+if ($node) { OK "Node.js found"; $nodeOk = $true }
+
 if (-not $nodeOk) {
   Info 'Node.js not found - installing automatically...'
   $installed = $false
