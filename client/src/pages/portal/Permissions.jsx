@@ -108,7 +108,8 @@ function PermissionsMatrix({ matrix, loadMatrix, flash, confirm }) {
     if (!needle) return users;
     return users.filter(u => 
       u.name.toLowerCase().includes(needle) || 
-      u.email.toLowerCase().includes(needle)
+      u.email.toLowerCase().includes(needle) ||
+      (u.extra && u.extra.toLowerCase().includes(needle))
     );
   }, [users, userQ]);
 
@@ -221,7 +222,9 @@ function PermissionsMatrix({ matrix, loadMatrix, flash, confirm }) {
                     <input type="checkbox" checked={selectedUsers.has(u.id)} onChange={() => toggleUserSelection(u.id)} className="mt-0.5 h-3.5 w-3.5 rounded border-slate-300 accent-primary" />
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-medium text-slate-700">{u.name}</div>
-                      <div className="truncate text-[10px] text-slate-400">{u.email}</div>
+                      <div className="truncate text-[10px] text-slate-400">
+                        {u.extra ? <span className="font-medium">{u.extra} &bull; </span> : null}{u.email}
+                      </div>
                     </div>
                   </label>
                 ))}
@@ -360,7 +363,9 @@ function UserAccounts({ matrix, loadMatrix, flash, confirm }) {
                   {u.name} {String(u.id) === String(me.id) && <span className="text-xs text-slate-400">(you)</span>}
                   {!u.isActive && <span className="ml-2 rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-red-700">disabled</span>}
                 </div>
-                <div className="text-xs text-slate-400">{u.email}</div>
+                <div className="text-xs text-slate-400">
+                  {u.extra ? <span className="font-medium text-slate-500">{u.extra} &bull; </span> : null}{u.email}
+                </div>
               </div>
               <div className="flex flex-wrap items-center gap-1.5">
                 {u.roles.map((role) => (

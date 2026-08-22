@@ -30,12 +30,18 @@ class UserController extends Controller
     {
         Gate::authorize('staff.manage');
         
-        $q = User::with('roles')->take(50)->orderBy('name', 'asc');
+        $q = User::with(['roles', 'student.program', 'teacher.department'])->take(50)->orderBy('name', 'asc');
         
         if ($request->q) {
             $q->where(function($query) use ($request) {
                 $query->where('name', 'like', "%{$request->q}%")
-                      ->orWhere('email', 'like', "%{$request->q}%");
+                      ->orWhere('email', 'like', "%{$request->q}%")
+                      ->orWhereHas('student', function($sq) use ($request) {
+                          $sq->where('roll_number', 'like', "%{$request->q}%");
+                      })
+                      ->orWhereHas('teacher.department', function($dq) use ($request) {
+                          $dq->where('name', 'like', "%{$request->q}%");
+                      });
             });
         }
         
@@ -46,10 +52,18 @@ class UserController extends Controller
         }
         
         $users = $q->get()->map(function($u) {
+            $extra = '';
+            if ($u->student) {
+                $extra = "Student - Roll No: " . ($u->student->roll_number ?? 'N/A') . " - " . ($u->student->program->name ?? '');
+            } elseif ($u->teacher) {
+                $extra = "Teacher - Dept: " . ($u->teacher->department->name ?? 'N/A');
+            }
+
             return [
                 'id' => (string)$u->id,
                 'name' => $u->name,
                 'email' => $u->email,
+                'extra' => $extra,
                 'isActive' => $u->is_active,
                 'roles' => $u->roles->pluck('name')
             ];
