@@ -86,7 +86,7 @@ class AdminController extends Controller
                 'users' => $r->users_count,
                 'superAdmin' => in_array($r->name, self::SUPER_ROLES),
                 'grantable' => in_array($r->name, self::GRANTABLE_HINT),
-                'permissions' => $r->permissions->pluck('permission_id')
+                'permissions' => $r->permissions->pluck('id')
             ]),
             'defaults' => self::ROLE_DEFAULTS
         ]);
@@ -247,7 +247,7 @@ class AdminController extends Controller
     {
         $this->adminOnly($request);
         $user = User::with('permissions')->findOrFail($id);
-        return response()->json(['permissions' => $user->permissions->pluck('permission_id')]);
+        return response()->json(['permissions' => $user->permissions->pluck('id')]);
     }
 
     public function grantUserPermission(Request $request, $id)
