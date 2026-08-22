@@ -353,7 +353,7 @@ export default function Academic() {
         <Card title="Admission Cycles" actions={canManage && <Button onClick={() => openCreate('cycle', { status: 'open', startAt: localDateStr(new Date()) })}>+ Add</Button>}>
           <Table columns={[
             { header: 'Title', cell: (x) => <span className="font-semibold">{x.title}</span> },
-            { header: 'Level', cell: (x) => <Badge value={x.level} /> },
+            { header: 'Level', cell: (x) => <Badge value={x.level?.name ?? x.level} /> },
             { header: 'Session', cell: (x) => x.academicSession.name },
             { header: 'Window', cell: (x) => `${fmtDate(x.startAt)} → ${fmtDate(x.endAt)}` },
             { header: 'Status', cell: (x) => <Badge value={x.status} /> },
