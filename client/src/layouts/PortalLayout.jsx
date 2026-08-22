@@ -216,6 +216,24 @@ export default function PortalLayout() {
     return () => { window.removeEventListener('api-error', onError); clearTimeout(timer); };
   }, []);
 
+  // Monitor temporary permissions and force reload if any expire
+  useEffect(() => {
+    if (!user || !user.expirations) return;
+    const expDates = Object.values(user.expirations).map(v => new Date(v).getTime());
+    if (expDates.length === 0) return;
+    
+    const checkExpirations = () => {
+      const now = Date.now();
+      if (expDates.some(time => time <= now)) {
+        window.location.reload();
+      }
+    };
+    
+    // Check every 5 seconds
+    const interval = setInterval(checkExpirations, 5000);
+    return () => clearInterval(interval);
+  }, [user]);
+
   useEffect(() => {
     if (!user) return;
     api.get('/notifications').then((res) => setBell(res.data)).catch(() => {});

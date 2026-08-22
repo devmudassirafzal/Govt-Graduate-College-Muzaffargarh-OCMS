@@ -61,6 +61,12 @@ class AuthController extends Controller
             return $p->pivot->expires_at != null;
         })->pluck('name')->toArray();
 
+        $expirations = $activeDirect->filter(function($p) {
+            return $p->pivot->expires_at != null;
+        })->mapWithKeys(function($p) {
+            return [$p->name => \Carbon\Carbon::parse($p->pivot->expires_at)->toIso8601String()];
+        });
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -72,7 +78,8 @@ class AuthController extends Controller
                 'mustChangePassword' => $user->must_change_password,
                 'roles' => $userRoles,
                 'permissions' => $allPermissions,
-                'temporaryPermissions' => $temporaryPermissions
+                'temporaryPermissions' => $temporaryPermissions,
+                'expirations' => $expirations
             ]
         ]);
     }
@@ -98,6 +105,12 @@ class AuthController extends Controller
             return $p->pivot->expires_at != null;
         })->pluck('name')->toArray();
 
+        $expirations = $activeDirect->filter(function($p) {
+            return $p->pivot->expires_at != null;
+        })->mapWithKeys(function($p) {
+            return [$p->name => \Carbon\Carbon::parse($p->pivot->expires_at)->toIso8601String()];
+        });
+
         return response()->json([
             'user' => [
                 'id' => (string) $user->id,
@@ -106,7 +119,8 @@ class AuthController extends Controller
                 'mustChangePassword' => $user->must_change_password,
                 'roles' => $userRoles,
                 'permissions' => $allPermissions,
-                'temporaryPermissions' => $temporaryPermissions
+                'temporaryPermissions' => $temporaryPermissions,
+                'expirations' => $expirations
             ]
         ]);
     }
