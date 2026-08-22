@@ -72,25 +72,24 @@ export default function AuditLogs() {
           ]}
           rows={data?.logs ?? []}
           empty={data === null ? 'Loading…' : 'No operations recorded yet.'}
-        />
-
-        {detail && (
-          <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="font-semibold text-slate-700">Request details</span>
-              <span className="font-mono text-xs text-slate-400">{detail.method} {detail.path}</span>
+          expandedRowRender={(l) => detail?.id === l.id ? (
+            <div className="text-sm">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="font-semibold text-slate-700">Request details</span>
+                <span className="font-mono text-xs text-slate-400">{l.method} {l.path}</span>
+              </div>
+              <dl className="grid gap-x-8 gap-y-1 sm:grid-cols-2">
+                <div><dt className="inline text-slate-400">By: </dt><dd className="inline">{l.userName ?? 'Not signed in'}</dd></div>
+                <div><dt className="inline text-slate-400">IP: </dt><dd className="inline font-mono text-xs">{l.ip ?? '—'}</dd></div>
+              </dl>
+              {l.summary && (
+                <pre className="mt-2 overflow-x-auto rounded border border-slate-200 bg-white p-3 text-xs text-slate-600">
+                  {JSON.stringify(l.summary, null, 2)}
+                </pre>
+              )}
             </div>
-            <dl className="grid gap-x-8 gap-y-1 sm:grid-cols-2">
-              <div><dt className="inline text-slate-400">By: </dt><dd className="inline">{detail.userName ?? 'Not signed in'}</dd></div>
-              <div><dt className="inline text-slate-400">IP: </dt><dd className="inline font-mono text-xs">{detail.ip ?? '—'}</dd></div>
-            </dl>
-            {detail.summary && (
-              <pre className="mt-2 overflow-x-auto rounded bg-white p-3 text-xs text-slate-600">
-                {JSON.stringify(detail.summary, null, 2)}
-              </pre>
-            )}
-          </div>
-        )}
+          ) : null}
+        />
 
         {data && data.pages > 1 && (
           <div className="mt-4 flex items-center justify-between text-sm text-slate-500">
