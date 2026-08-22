@@ -36,8 +36,8 @@ class AcademicSession extends Model
 	public $timestamps = false;
 
 	protected $casts = [
-		'start_year' => 'datetime',
-		'end_year' => 'datetime',
+		'start_year' => 'integer',
+		'end_year' => 'integer',
 		'is_current' => 'bool'
 	];
 
