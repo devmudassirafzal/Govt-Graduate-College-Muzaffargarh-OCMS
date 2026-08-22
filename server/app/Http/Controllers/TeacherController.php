@@ -64,7 +64,50 @@ class TeacherController extends Controller
         
         if (!$request->hasFile('photo')) return response()->json(['message' => 'A photo file is required.'], 422);
         
-        $url = $this->handleUpload($request->file('photo'), 'teachers');
+        $file = $request->file('photo');
+
+        // Check for blue background using GD
+        $path = $file->getPathname();
+        $type = @exif_imagetype($path);
+        
+        if (in_array($type, [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_WEBP])) {
+            $img = null;
+            if ($type == IMAGETYPE_JPEG) $img = @imagecreatefromjpeg($path);
+            elseif ($type == IMAGETYPE_PNG) $img = @imagecreatefrompng($path);
+            elseif ($type == IMAGETYPE_WEBP) $img = @imagecreatefromwebp($path);
+            
+            if ($img) {
+                $w = imagesx($img);
+                $h = imagesy($img);
+                // Sample 4 corners, slightly inset
+                $pts = [
+                    ['x' => max(1, intval($w * 0.05)), 'y' => max(1, intval($h * 0.05))],
+                    ['x' => min($w - 1, intval($w * 0.95)), 'y' => max(1, intval($h * 0.05))],
+                    ['x' => max(1, intval($w * 0.05)), 'y' => min($h - 1, intval($h * 0.95))],
+                    ['x' => min($w - 1, intval($w * 0.95)), 'y' => min($h - 1, intval($h * 0.95))],
+                ];
+                
+                $blueCount = 0;
+                foreach ($pts as $p) {
+                    $rgb = @imagecolorat($img, $p['x'], $p['y']);
+                    if ($rgb !== false) {
+                        $colors = @imagecolorsforindex($img, $rgb);
+                        // True blue: Blue channel is higher than red and green, and relatively bright
+                        if ($colors && $colors['blue'] > $colors['red'] + 15 && $colors['blue'] > $colors['green'] + 10 && $colors['blue'] > 50) {
+                            $blueCount++;
+                        }
+                    }
+                }
+                imagedestroy($img);
+                
+                // If the background doesn't appear blue in at least 2 corners, reject it.
+                if ($blueCount < 2) {
+                    return response()->json(['message' => 'Profile picture rejected. Please upload a passport-size photo with a solid BLUE background.'], 422);
+                }
+            }
+        }
+        
+        $url = $this->handleUpload($file, 'teachers');
         $teacher->update(['photo_path' => $url]);
         
         return response()->json(['message' => 'Photo updated.', 'url' => $url]);

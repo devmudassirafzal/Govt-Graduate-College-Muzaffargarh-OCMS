@@ -150,16 +150,29 @@ export default function Home() {
       {/* Slider */}
       {sliders.length > 0 && (
         <section className="relative overflow-hidden bg-gradient-to-br from-primary-dark via-primary to-primary-light text-white">
-          {/* Floating decorative shapes — same palette, pure motion */}
-          <div aria-hidden className="pointer-events-none absolute inset-0">
+          {/* Background Image Layer */}
+          {sliders[slide].imagePath && (
+            <div className="absolute inset-0 z-0">
+              <img
+                key={`img-${slide}`}
+                src={sliders[slide].imagePath}
+                alt={sliders[slide].heading}
+                className="hero-swap h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/60" />
+            </div>
+          )}
+          
+          {/* Floating decorative shapes — only visible if no image, or blended */}
+          <div aria-hidden className={`pointer-events-none absolute inset-0 z-0 ${sliders[slide].imagePath ? 'opacity-30' : ''}`}>
             <div className="float-blob absolute -left-16 top-6 h-56 w-56 rounded-full bg-white/10" />
             <div className="float-blob-slow absolute -right-24 -bottom-16 h-80 w-80 rounded-full bg-white/10" />
             <div className="float-blob absolute right-1/4 -top-12 h-40 w-40 rounded-full bg-gold/25" />
             <div className="float-blob-slow absolute left-1/4 bottom-0 h-24 w-24 rounded-full bg-accent/20" />
           </div>
-          <div className="relative mx-auto flex min-h-72 max-w-6xl flex-col items-center justify-center px-4 py-16 text-center">
+          <div className="relative z-10 mx-auto flex min-h-72 max-w-6xl flex-col items-center justify-center px-4 py-16 text-center">
             {/* key={slide} remounts the text so it animates in on every slide change */}
-            <div key={slide} className="hero-swap">
+            <div key={`txt-${slide}`} className="hero-swap">
               <h2 className="mb-3 text-3xl font-bold sm:text-4xl">{sliders[slide].heading}</h2>
               <p className="mb-8 max-w-2xl text-lg text-green-100">{sliders[slide].subheading}</p>
             </div>

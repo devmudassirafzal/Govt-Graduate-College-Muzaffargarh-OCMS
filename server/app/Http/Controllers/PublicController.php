@@ -86,7 +86,13 @@ class PublicController extends Controller
         $seats = $programs->sum('seats');
 
         return response()->json([
-            'sliders' => $sliders,
+            'sliders' => $sliders->map(fn($s) => [
+                'id' => $s->id,
+                'heading' => $s->heading,
+                'subheading' => $s->subheading,
+                'imagePath' => $s->image_path,
+                'sortOrder' => $s->sort_order
+            ]),
             'notices' => $notices->map(fn($n) => $this->serializeNotice($n)),
             'programs' => $programs->map(fn($p) => $this->serializeProgram($p)),
             'principalMessage' => $principalPage && $principalPage->is_published ? [
@@ -205,14 +211,20 @@ class PublicController extends Controller
     {
         $departmentId = $request->query('department') ? (int)$request->query('department') : null;
         
-        $q = Teacher::with(['department', 'designation'])->where('status', 'active');
+        $q = Teacher::with(['department', 'designation', 'hodOf'])->where('status', 'active');
         if ($departmentId) $q->where('department_id', $departmentId);
         $teachers = $q->orderBy('designation_id', 'asc')->orderBy('name', 'asc')->get();
 
         $departments = Department::orderBy('name', 'asc')->get();
+        $departmentMsg = null;
+        if ($departmentId) {
+            $d = Department::find($departmentId);
+            if ($d) $departmentMsg = $d->message;
+        }
 
         return response()->json([
             'departments' => $departments->map(fn($d) => ['id' => $d->id, 'name' => $d->name]),
+            'departmentMessage' => $departmentMsg,
             'faculty' => $teachers->map(fn($t) => [
                 'id' => (string)$t->id,
                 'name' => $t->name,
@@ -221,7 +233,8 @@ class PublicController extends Controller
                 'qualification' => $t->qualification,
                 'specialization' => $t->specialization,
                 'photoPath' => $t->photo_path,
-                'gender' => $t->gender
+                'gender' => $t->gender,
+                'isHod' => $t->hodOf !== null
             ])
         ]);
     }

@@ -10,11 +10,13 @@ import SecurePlayer from '../../components/SecurePlayer';
 // 11-character video id. Uploads are expected to be UNLISTED on the college
 // channel — a private video will not play in an embed, and a public one defeats
 // the point.
-const BLANK = { allocationId: '', title: '', description: '', youtubeUrl: '', durationMins: '', quizId: '', isPublished: true };
-const hhmm = (s) => {
-  if (!s) return '—';
-  const m = Math.floor(s / 60);
-  return m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`;
+const BLANK = { allocationId: '', title: '', description: '', youtubeUrl: '', durationMins: '', quizId: '', isPublished: true, strictTracking: false };
+const hhmmss = (s) => {
+  if (!s) return '00h:00m:00s';
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const secs = Math.floor(s % 60);
+  return `${String(h).padStart(2, '0')}h:${String(m).padStart(2, '0')}m:${String(secs).padStart(2, '0')}s`;
 };
 
 export default function TeacherLectures() {
@@ -132,11 +134,18 @@ export default function TeacherLectures() {
           </div>
         </div>
 
-        <label className="mt-3 flex items-center gap-2 text-sm text-slate-600">
-          <input type="checkbox" className="h-4 w-4" checked={form.isPublished}
-            onChange={(e) => setForm({ ...form, isPublished: e.target.checked })} />
-          Publish to the class now (students are notified)
-        </label>
+        <div className="mt-4 flex flex-col gap-2">
+          <label className="flex items-center gap-2 text-sm text-slate-600">
+            <input type="checkbox" className="h-4 w-4" checked={form.isPublished}
+              onChange={(e) => setForm({ ...form, isPublished: e.target.checked })} />
+            Publish to the class now (students are notified)
+          </label>
+          <label className="flex items-center gap-2 text-sm text-slate-600">
+            <input type="checkbox" className="h-4 w-4" checked={form.strictTracking}
+              onChange={(e) => setForm({ ...form, strictTracking: e.target.checked })} />
+            <strong>Strict Tracking:</strong> Students must watch the full duration to get marked as Completed (skipping is not allowed).
+          </label>
+        </div>
 
         <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
           Upload the recording to the college channel as <b>Unlisted</b>. A <b>Private</b> video will not play in
@@ -158,7 +167,7 @@ export default function TeacherLectures() {
           columns={[
             { header: 'Title', cell: (l) => <span className="font-medium">{l.title}</span> },
             { header: 'Class', cell: (l) => `${l.subject?.code} · Sem ${l.section?.termNo} (${l.section?.shift})` },
-            { header: 'Length', cell: (l) => (l.durationSec ? hhmm(l.durationSec) : l.durationMins ? `${l.durationMins}m` : '—') },
+            { header: 'Length', cell: (l) => (l.durationSec ? hhmmss(l.durationSec) : l.durationMins ? `${l.durationMins}m` : '—') },
             { header: 'Quiz', cell: (l) => (l.quiz ? l.quiz.title : <span className="text-slate-400">—</span>) },
             { header: 'Status', cell: (l) => <Badge value={l.isPublished ? 'published' : 'draft'} /> },
             { header: 'Posted', cell: (l) => fmtDate(l.createdAt) },
@@ -171,9 +180,14 @@ export default function TeacherLectures() {
                   <Button variant="outline" onClick={() => {
                     setEditing(l);
                     setForm({
-                      allocationId: '', title: l.title, description: l.description ?? '',
-                      youtubeUrl: '', durationMins: l.durationMins ?? '',
-                      quizId: l.quizId ?? '', isPublished: l.isPublished,
+                      allocationId: l.allocationId ?? '',
+                      title: l.title,
+                      description: l.description ?? '',
+                      youtubeUrl: l.youtubeId ? `https://youtu.be/${l.youtubeId}` : '',
+                      durationMins: l.durationMins ?? '',
+                      quizId: l.quizId ?? '',
+                      isPublished: l.isPublished,
+                      strictTracking: l.strictTracking ?? false
                     });
                   }}>Edit</Button>
                   <Button variant="danger" onClick={() => remove(l)}>Delete</Button>
@@ -211,19 +225,41 @@ export default function TeacherLectures() {
                 { header: 'Roll No', cell: (r) => <span className="font-mono text-xs">{r.rollNumber}</span> },
                 { header: 'Name', cell: (r) => r.name },
                 {
-                  header: 'Watched',
+                  header: 'Watched %',
                   cell: (r) => (
                     <div className="flex items-center gap-2">
                       <div className="h-1.5 w-24 rounded-full bg-slate-100">
-                        <div className="h-1.5 rounded-full bg-primary" style={{ width: `${r.percent ?? 0}%` }} />
+                        <div className="h-1.5 rounded-full bg-primary" style={{ width: `${r.watchedPct ?? 0}%` }} />
                       </div>
-                      <span className="text-xs text-slate-500">{r.percent ?? 0}%</span>
+                      <span className="text-xs text-slate-500">{r.watchedPct ?? 0}%</span>
                     </div>
                   ),
                 },
-                { header: 'Viewing time', cell: (r) => hhmm(r.watchedSec) },
-                { header: 'Sittings', cell: (r) => r.sessions || '—' },
-                { header: 'Finished', cell: (r) => (r.completedAt ? <Badge value="completed" /> : <span className="text-slate-400">—</span>) },
+                { header: 'Viewing time', cell: (r) => <span className="font-mono text-xs">{hhmmss(r.watchedSec)}</span> },
+                { header: 'Sittings', cell: (r) => {
+                    if (!r.attempts || r.attempts.length === 0) return r.sessions || '—';
+                    return (
+                      <div className="flex flex-col gap-1 text-xs whitespace-nowrap">
+                        {r.attempts.map(a => (
+                          <div key={a.sessionNumber} className="flex gap-2 items-center">
+                            <span className="font-medium text-slate-700">#{a.sessionNumber}</span>
+                            <span className="text-slate-500 font-mono">{hhmmss(a.watchedSec)}</span>
+                            <span className="text-slate-400 text-[10px]">({a.watchedPct}%)</span>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  } 
+                },
+                { 
+                  header: 'Status', 
+                  cell: (r) => {
+                    if (!r.started) return <span className="text-slate-400">—</span>;
+                    if (r.forwarded) return <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">Forwarded</span>;
+                    if (r.watchedFull) return <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Watched Full Video</span>;
+                    return <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">Watching...</span>;
+                  }
+                },
                 {
                   header: 'Quiz',
                   cell: (r) => (!report.lecture.quiz

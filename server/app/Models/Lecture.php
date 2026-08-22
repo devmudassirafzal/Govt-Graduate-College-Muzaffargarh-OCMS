@@ -55,6 +55,7 @@ class Lecture extends Model
 		'duration_mins',
 		'duration_sec',
 		'is_published',
+		'strict_tracking',
 		'quiz_id',
 		'posted_by'
 	];

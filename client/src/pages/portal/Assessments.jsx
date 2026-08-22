@@ -40,9 +40,12 @@ export default function Assessments() {
     finally { setDeletingId(null); }
   }
 
+  const [sortOrder, setSortOrder] = useState('roll');
+
   async function openGrid(a) {
     const r = await api.get(`/assessments/${a.id}/marks`);
     setGrid(r.data);
+    setSortOrder('roll');
   }
 
   async function saveMarks() {
@@ -134,9 +137,14 @@ export default function Assessments() {
       <Modal open={!!grid} wide title={grid ? `Marks entry — ${grid.assessment.title} (total ${grid.assessment.totalMarks})` : ''} onClose={() => setGrid(null)}>
         {grid && (
           <div>
-            <div className="mb-3 flex justify-between print:hidden">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3 print:hidden">
               <span className="text-sm text-slate-500">Blank = absent. Obtained ≤ total.</span>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
+                <Select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} style={{ width: 140 }}>
+                  <option value="roll">Roll No</option>
+                  <option value="highest">Highest Marks</option>
+                  <option value="lowest">Lowest Marks</option>
+                </Select>
                 <Button variant="outline" onClick={() => window.print()}>Award list</Button>
                 <Button onClick={saveMarks} disabled={grid.assessment.isPublished}>Save draft</Button>
               </div>
@@ -146,7 +154,11 @@ export default function Assessments() {
                 Award List — {grid.assessment.title} (total {grid.assessment.totalMarks})
               </div>
               <div className="max-h-[55vh] space-y-1.5 overflow-y-auto">
-              {grid.students.map((s, i) => (
+              {[...grid.students].sort((a, b) => {
+                if (sortOrder === 'highest') return (b.obtained ?? -1) - (a.obtained ?? -1);
+                if (sortOrder === 'lowest') return (a.obtained ?? -1) - (b.obtained ?? -1);
+                return a.rollNumber.localeCompare(b.rollNumber);
+              }).map((s, i) => (
                 <div key={s.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-100 px-3 py-1.5">
                   <span className="text-sm"><span className="font-mono text-xs text-slate-400">{s.rollNumber}</span> {s.name}</span>
                   <Input
@@ -155,8 +167,11 @@ export default function Assessments() {
                     value={s.obtained ?? ''}
                     onChange={(e) => {
                       const students = [...grid.students];
-                      students[i] = { ...s, obtained: e.target.value === '' ? null : e.target.value };
-                      setGrid({ ...grid, students });
+                      const idx = students.findIndex((st) => st.id === s.id);
+                      if (idx > -1) {
+                        students[idx] = { ...students[idx], obtained: e.target.value === '' ? null : e.target.value };
+                        setGrid({ ...grid, students });
+                      }
                     }}
                     style={{ width: 90 }}
                   />

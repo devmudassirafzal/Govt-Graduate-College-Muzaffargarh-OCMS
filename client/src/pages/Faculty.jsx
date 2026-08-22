@@ -54,21 +54,43 @@ export default function Faculty() {
         </div>
 
         {!data && <Loading />}
+        
+        {data && data.departmentMessage && (
+          <div className="mb-8 rounded-xl border border-green-200 bg-green-50 p-6 text-green-900 shadow-sm">
+            <h3 className="mb-2 font-bold text-primary">Head of Department's Message</h3>
+            <div className="text-sm whitespace-pre-wrap">{data.departmentMessage}</div>
+          </div>
+        )}
+
         {data && data.faculty.length === 0 && (
           <p className="py-16 text-center text-slate-500">No faculty members found.</p>
         )}
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {data?.faculty.map((t) => (
+          {data?.faculty
+            .sort((a, b) => {
+              if (a.isHod === b.isHod) return 0;
+              return a.isHod ? -1 : 1;
+            })
+            .map((t) => (
             <Link
               key={t.id}
               to={`/faculty/${t.id}`}
-              className="group rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:shadow-lg"
+              className={`group rounded-xl border p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${
+                t.isHod ? 'border-primary/50 bg-green-50/50 hover:border-primary' : 'border-slate-200 bg-white hover:border-primary'
+              }`}
             >
               <div className="mb-3 flex items-center gap-4">
-                <FacultyAvatar teacher={t} />
+                <div className="relative">
+                  <FacultyAvatar teacher={t} />
+                  {t.isHod && (
+                    <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] text-white shadow" title="Head of Department">
+                      ★
+                    </div>
+                  )}
+                </div>
                 <div>
                   <h2 className="font-bold text-slate-800 group-hover:text-primary">{t.name}</h2>
-                  <p className="text-sm text-accent">{t.designation}</p>
+                  <p className="text-sm text-accent">{t.isHod ? 'Head of Department' : t.designation}</p>
                 </div>
               </div>
               <dl className="space-y-1 text-sm text-slate-600">

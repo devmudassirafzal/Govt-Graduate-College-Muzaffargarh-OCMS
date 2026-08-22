@@ -11,7 +11,14 @@ import SecurePlayer from '../../components/SecurePlayer';
 // returning one. Watch progress is reported back while the video plays, so the
 // list can show what is part-watched, what is finished, and whether the
 // follow-up quiz has been done.
-const mins = (s) => (s ? `${Math.round(s / 60)} min` : null);
+const hhmmss = (s) => {
+  if (!s) return '00h:00m:00s';
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const secs = s % 60;
+  return `${String(h).padStart(2, '0')}h:${String(m).padStart(2, '0')}m:${String(secs).padStart(2, '0')}s`;
+};
+const mins = (s) => (s ? hhmmss(s) : null);
 
 export default function StudentLectures() {
   const [lectures, setLectures] = useState(null);
@@ -79,6 +86,7 @@ export default function StudentLectures() {
             startAt={progress?.lastPosSec ?? 0}
             onProgress={report}
             onEnded={() => setJustFinished(true)}
+            onWatchAgain={() => setJustFinished(false)}
           />
 
           <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
@@ -91,13 +99,21 @@ export default function StudentLectures() {
                   <span className="text-slate-600">{progress.percent ?? 0}% watched</span>
                 </div>
                 <span className="text-slate-400">·</span>
-                <span className="text-slate-600">{Math.round(progress.watchedSec / 60)} min of viewing</span>
+                <span className="text-slate-600 font-mono text-xs">{hhmmss(progress.watchedSec)} of viewing</span>
                 {progress.completedAt && <Badge value="completed" />}
               </>
             )}
           </div>
 
-          {justFinished && quiz && (
+          {justFinished && playing.strictTracking && !progress?.completedAt && (
+            <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
+              <div className="font-semibold text-amber-800">You reached the end, but...</div>
+              <p className="mt-1 text-sm text-amber-700">
+                This lecture requires you to watch the full video. You skipped parts of it, so it is still marked as Incomplete. Please go back and watch the parts you missed.
+              </p>
+            </div>
+          )}
+          {justFinished && quiz && (playing.strictTracking ? progress?.completedAt : true) && (
             <div className="mt-4 rounded-lg border border-green-200 bg-green-50 p-4">
               <div className="font-semibold text-green-800">Lecture finished — now take the quiz</div>
               <p className="mt-1 text-sm text-green-700">
@@ -108,7 +124,7 @@ export default function StudentLectures() {
               </Button>
             </div>
           )}
-          {justFinished && !quiz && (
+          {justFinished && !quiz && (playing.strictTracking ? progress?.completedAt : true) && (
             <div className="mt-4 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">
               Lecture finished — your progress has been recorded.
             </div>

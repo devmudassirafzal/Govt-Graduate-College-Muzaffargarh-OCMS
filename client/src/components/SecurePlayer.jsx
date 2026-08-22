@@ -73,7 +73,7 @@ const IconExitFullscreen = () => (
   </svg>
 );
 
-export default function SecurePlayer({ youtubeId, title, startAt = 0, onProgress, onEnded }) {
+export default function SecurePlayer({ youtubeId, title, startAt = 0, onProgress, onEnded, onWatchAgain }) {
   const host = useRef(null);
   const player = useRef(null);
   const shell = useRef(null);
@@ -341,12 +341,25 @@ export default function SecurePlayer({ youtubeId, title, startAt = 0, onProgress
 
         {/* Lecture-complete overlay */}
         {finished && (
-          <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm">
             <div className="text-center text-white">
               <div className="mb-2 text-4xl">✓</div>
               <div className="text-xl font-bold">Lecture complete</div>
               <div className="mt-1.5 text-sm text-white/70">Your progress has been recorded.</div>
             </div>
+            <button
+              onClick={() => {
+                setFinished(false);
+                playedSince.current = 0;
+                report({ newAttempt: true });
+                player.current?.seekTo(0, true);
+                player.current?.playVideo();
+                onWatchAgain?.();
+              }}
+              className="mt-6 rounded-full bg-white/20 px-6 py-2.5 text-sm font-semibold text-white hover:bg-white/30 transition-colors backdrop-blur-md cursor-pointer"
+            >
+              Watch Again
+            </button>
           </div>
         )}
 

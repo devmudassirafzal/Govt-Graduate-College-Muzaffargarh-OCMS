@@ -35,9 +35,12 @@ class LectureController extends Controller
             'id' => $l->id,
             'title' => $l->title,
             'description' => $l->description,
+            'youtubeId' => $l->youtube_id,
+            'allocationId' => $l->allocation_id,
             'durationMins' => $l->duration_mins,
             'durationSec' => $l->duration_sec,
-            'isPublished' => $l->is_published,
+            'isPublished' => (bool)$l->is_published,
+            'strictTracking' => (bool)$l->strict_tracking,
             'quizId' => $l->quiz_id,
             'quiz' => $l->quiz ? [
                 'id' => $l->quiz->id,
@@ -134,6 +137,7 @@ class LectureController extends Controller
             'duration_mins' => $request->durationMins ? (int)$request->durationMins : null,
             'quiz_id' => $quizId,
             'is_published' => filter_var($request->isPublished, FILTER_VALIDATE_BOOLEAN),
+            'strict_tracking' => filter_var($request->strictTracking, FILTER_VALIDATE_BOOLEAN),
             'posted_by' => $request->user()->id
         ]);
 
@@ -163,6 +167,7 @@ class LectureController extends Controller
         }
         if ($request->has('durationMins')) $data['duration_mins'] = $request->durationMins ? (int)$request->durationMins : null;
         if ($request->has('isPublished')) $data['is_published'] = filter_var($request->isPublished, FILTER_VALIDATE_BOOLEAN);
+        if ($request->has('strictTracking')) $data['strict_tracking'] = filter_var($request->strictTracking, FILTER_VALIDATE_BOOLEAN);
         if ($request->has('quizId')) $data['quiz_id'] = $request->quizId ? (int)$request->quizId : null;
 
         $wasPublished = $lecture->is_published;
@@ -272,15 +277,37 @@ class LectureController extends Controller
         $watched = ($existing ? $existing->watched_sec : 0) + $credited;
         
         $ended = filter_var($request->ended, FILTER_VALIDATE_BOOLEAN);
-        $finished = $ended || ($dur > 0 && $furthest >= floor($dur * self::COMPLETE_AT));
+        $reachedEnd = $ended || ($dur > 0 && $furthest >= floor($dur * self::COMPLETE_AT));
+
+        if ($lecture->strict_tracking) {
+            $finished = ($dur > 0 && $watched >= floor($dur * self::COMPLETE_AT));
+        } else {
+            $finished = $reachedEnd;
+        }
 
         $completedAt = $existing && $existing->completed_at ? $existing->completed_at : ($finished ? Carbon::now() : null);
+        
+        // Notify if they reached the end but skipped parts of it (under strict tracking)
+        if ($lecture->strict_tracking && $reachedEnd && !$finished) {
+            $notifiedSkip = $existing ? $existing->notified_skip : false;
+            if (!$notifiedSkip) {
+                NotifyService::notify($student->user_id, 'system', 'Lecture Incomplete', "You reached the end of “{$lecture->title}”, but haven't watched the full video. Skipping is not allowed. Please watch it completely.", '/portal/lectures');
+            }
+        }
 
         $sessions = $existing ? $existing->sessions : 0;
+        $newAttempt = filter_var($request->newAttempt, FILTER_VALIDATE_BOOLEAN);
+        
         if (!$existing) {
             $sessions = 1;
-        } elseif ($gapSec > 300) {
+        } elseif ($gapSec > 300 || $newAttempt) {
             $sessions++;
+            // If they forced a new attempt via "Watch Again", don't credit them any time for this initial ping.
+            if ($newAttempt) {
+                $credited = 0; 
+                $watched = $existing->watched_sec; // no additional time
+                $furthest = $existing->furthest_sec; 
+            }
         }
 
         $progress = LectureProgress::updateOrCreate(
@@ -291,9 +318,19 @@ class LectureController extends Controller
                 'last_pos_sec' => $pos,
                 'sessions' => $sessions,
                 'completed_at' => $completedAt,
-                'last_seen_at' => Carbon::now()
+                'last_seen_at' => Carbon::now(),
+                'notified_skip' => ($lecture->strict_tracking && $reachedEnd && !$finished) ? true : ($existing ? $existing->notified_skip : false)
             ]
         );
+
+        $sessionRecord = \App\Models\LectureSession::firstOrCreate([
+            'lecture_id' => $lecture->id,
+            'student_id' => $student->id,
+            'session_number' => $sessions
+        ]);
+        $sessionRecord->watched_sec += $credited;
+        $sessionRecord->furthest_sec = max($sessionRecord->furthest_sec, $dur ? min($pos, $dur) : $pos);
+        $sessionRecord->save();
 
         if ($dur > 0 && !$lecture->duration_sec) {
             $lecture->update(['duration_sec' => $dur]);
@@ -326,6 +363,7 @@ class LectureController extends Controller
             ->get();
             
         $progress = LectureProgress::where('lecture_id', $lecture->id)->get()->keyBy('student_id');
+        $allSessions = \App\Models\LectureSession::where('lecture_id', $lecture->id)->orderBy('session_number', 'asc')->get()->groupBy('student_id');
         
         $subs = $lecture->quiz_id 
             ? ClassworkSubmission::where('classwork_id', $lecture->quiz_id)->get()->keyBy('student_id')
@@ -337,17 +375,35 @@ class LectureController extends Controller
         foreach ($students as $s) {
             $p = $progress->get($s->id);
             $sub = $subs->get($s->id);
+            $studentSessions = $allSessions->get($s->id) ?? collect();
             
-            $pct = ($p && $dur > 0) ? min(100, round(($p->furthest_sec / $dur) * 100)) : ($p ? null : 0);
+            $furthestPct = ($p && $dur > 0) ? min(100, round(($p->furthest_sec / $dur) * 100)) : ($p ? null : 0);
+            $watchedPct = ($p && $dur > 0) ? min(100, round(($p->watched_sec / $dur) * 100)) : ($p ? null : 0);
             
+            $reachedEnd = ($p && $dur > 0 && $p->furthest_sec >= floor($dur * self::COMPLETE_AT));
+            $watchedFull = ($p && $dur > 0 && $p->watched_sec >= floor($dur * self::COMPLETE_AT));
+            $forwarded = ($reachedEnd && !$watchedFull);
+
+            $attempts = $studentSessions->map(function($sess) use ($dur) {
+                return [
+                    'sessionNumber' => $sess->session_number,
+                    'watchedSec' => $sess->watched_sec,
+                    'watchedPct' => $dur > 0 ? min(100, round(($sess->watched_sec / $dur) * 100)) : 0
+                ];
+            })->values()->toArray();
+
             $rows[] = [
                 'studentId' => $s->id,
                 'rollNumber' => $s->roll_number,
                 'name' => $s->name,
                 'started' => (bool)$p,
                 'watchedSec' => $p ? $p->watched_sec : 0,
-                'percent' => $pct,
+                'furthestPct' => $furthestPct,
+                'watchedPct' => $watchedPct,
+                'forwarded' => $forwarded,
+                'watchedFull' => $watchedFull,
                 'sessions' => $p ? $p->sessions : 0,
+                'attempts' => $attempts,
                 'completedAt' => $p ? $p->completed_at : null,
                 'lastSeenAt' => $p ? $p->last_seen_at : null,
                 'quizAttempted' => (bool)$sub,
