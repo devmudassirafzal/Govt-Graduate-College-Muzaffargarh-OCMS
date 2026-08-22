@@ -23,17 +23,17 @@ export default function Academic() {
   const [flash, flashEl] = useFlash();
 
   const load = async () => {
-    const [dep, prog, subj, sect, alloc, sess, cyc, groups, teach, desig, docs] = await Promise.all([
+    const [dep, prog, subj, sect, alloc, sess, cyc, groups, teach, desig, docs, matricGroups] = await Promise.all([
       api.get('/academic/departments'), api.get('/academic/programs'), api.get('/academic/subjects'),
       api.get('/academic/sections'), api.get('/academic/allocations'), api.get('/academic/sessions'),
       api.get('/academic/cycles'), api.get('/academic/inter-groups'), api.get('/teachers', { params: { all: 1 } }),
-      api.get('/academic/designations'), api.get('/academic/document-types'),
+      api.get('/academic/designations'), api.get('/academic/document-types'), api.get('/academic/matric-groups')
     ]);
     setData({
       departments: dep.data.departments, programs: prog.data.programs, subjects: subj.data.subjects,
       sections: sect.data.sections, allocations: alloc.data.allocations, sessions: sess.data.sessions,
       cycles: cyc.data.cycles, interGroups: groups.data.interGroups, teachers: teach.data.teachers,
-      designations: desig.data.designations, documentTypes: docs.data.documentTypes,
+      designations: desig.data.designations, documentTypes: docs.data.documentTypes, matricGroups: matricGroups.data.matricGroups
     });
   };
   useEffect(() => { load(); }, []);
@@ -426,9 +426,33 @@ export default function Academic() {
           <Field label="Code"><Input value={form.code ?? ''} onChange={set('code')} disabled={!!editItem} /></Field>
           {!editItem && (
             <Field label="Level">
-              <Select value={form.level} onChange={(e) => setForm({ ...form, level: e.target.value, durationYears: e.target.value === 'bs' ? 4 : 2, totalSemesters: e.target.value === 'bs' ? 8 : '', minPercentage: e.target.value === 'bs' ? 60 : 50 })}>
-                <option value="bs">BS (4-year)</option><option value="intermediate">Intermediate</option>
+              <Select value={form.level ?? ''} onChange={(e) => setForm({ 
+                ...form, 
+                level: e.target.value, 
+                exam_system: e.target.value === 'bs' ? 'semester' : (e.target.value === 'diploma' ? 'semester' : 'annual'),
+                durationYears: e.target.value === 'bs' ? 4 : 2, 
+                totalSemesters: e.target.value === 'bs' ? 8 : (e.target.value === 'diploma' ? 4 : ''), 
+                minPercentage: e.target.value === 'bs' ? 60 : 50 
+              })}>
+                <option value="">Select…</option>
+                <option value="bs">BS / Bachelor</option>
+                <option value="diploma">Diploma (e.g. DIT)</option>
+                <option value="intermediate">Intermediate (e.g. FSc/ICS)</option>
               </Select>
+            </Field>
+          )}
+          <Field label="Exam System">
+            <Select value={form.exam_system ?? 'semester'} onChange={set('exam_system')}>
+              <option value="semester">Semester System</option>
+              <option value="annual">Annual System</option>
+            </Select>
+          </Field>
+          <Field label="Duration (Years)">
+            <Input type="number" value={form.durationYears ?? ''} onChange={set('durationYears')} />
+          </Field>
+          {form.exam_system !== 'annual' && (
+            <Field label="Total Semesters">
+              <Input type="number" value={form.totalSemesters ?? ''} onChange={set('totalSemesters')} />
             </Field>
           )}
           {(form.level === 'bs' || editItem?.level === 'bs') ? (
@@ -439,10 +463,12 @@ export default function Academic() {
               </Select>
             </Field>
           ) : (
-            <Field label="Intermediate group">
+            <Field label="Intermediate/Diploma group">
               <Select value={form.interGroupId ?? ''} onChange={set('interGroupId')}>
                 <option value="">Select…</option>
-                {d.interGroups.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
+                {d.interGroups.map((g) => (
+                  <option key={g.id} value={g.id}>{g.name}</option>
+                ))}
               </Select>
             </Field>
           )}
@@ -455,11 +481,13 @@ export default function Academic() {
               </Select>
             </Field>
           )}
-          {(form.level === 'bs' || editItem?.level === 'bs') && (
+          {form.level && (
             <div className="col-span-full">
-              <span className="mb-1 block text-sm font-medium text-slate-700">Eligibility matrix — allowed intermediate groups (§6.2)</span>
+              <span className="mb-1 block text-sm font-medium text-slate-700">
+                Eligibility matrix — allowed {form.level === 'bs' ? 'intermediate groups' : 'matric groups'}
+              </span>
               <div className="flex flex-wrap gap-3">
-                {d.interGroups.map((g) => (
+                {(form.level === 'bs' ? d.interGroups : (d.matricGroups ?? [])).map((g) => (
                   <label key={g.id} className="flex items-center gap-1.5 text-sm">
                     <input type="checkbox" checked={(form.eligibleGroupIds ?? []).includes(g.id)}
                       onChange={(e) => {

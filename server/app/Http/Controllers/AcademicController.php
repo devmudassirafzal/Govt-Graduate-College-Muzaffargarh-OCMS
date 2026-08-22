@@ -15,6 +15,10 @@ use App\Models\ProgramEligibility;
 use App\Models\Subject;
 use App\Models\ClassSection;
 use App\Models\Allocation;
+use App\Models\UserHasPermission;
+use App\Models\UserRole;
+use App\Models\Teacher;
+use App\Models\MatricGroup;
 use App\Services\HodService;
 
 class AcademicController extends Controller
@@ -130,6 +134,11 @@ class AcademicController extends Controller
     public function getInterGroups()
     {
         return response()->json(['interGroups' => InterGroup::orderBy('name', 'asc')->get()]);
+    }
+
+    public function getMatricGroups()
+    {
+        return response()->json(['matricGroups' => MatricGroup::orderBy('name', 'asc')->get()]);
     }
 
     public function storeInterGroup(Request $request)
@@ -341,7 +350,7 @@ class AcademicController extends Controller
     public function getPrograms()
     {
         return response()->json([
-            'programs' => Program::with(['department', 'interGroup', 'programEligibilities.interGroup'])
+            'programs' => Program::with(['department', 'interGroup', 'programEligibilities.interGroup', 'programEligibilities.matricGroup'])
                                  ->orderBy('level', 'desc')->orderBy('name', 'asc')->get()
         ]);
     }
@@ -349,14 +358,14 @@ class AcademicController extends Controller
     public function storeProgram(Request $request)
     {
         Gate::authorize('academic.manage');
-        $spans = ['bs' => 4, 'intermediate' => 2];
-        if (!isset($spans[$request->level]) || $request->durationYears != $spans[$request->level]) {
-            return response()->json(['message' => "Invalid duration for level."], 422);
+        if (!in_array($request->level, ['bs', 'intermediate', 'diploma'])) {
+            return response()->json(['message' => "Invalid program level."], 422);
         }
         $prog = Program::create([
             'name' => $request->name,
             'code' => $request->code,
             'level' => $request->level,
+            'exam_system' => $request->exam_system ?: ($request->level === 'bs' ? 'semester' : 'annual'),
             'department_id' => $request->departmentId,
             'inter_group_id' => $request->interGroupId,
             'duration_years' => $request->durationYears,
@@ -364,9 +373,13 @@ class AcademicController extends Controller
             'seats' => $request->seats,
             'min_percentage' => $request->minPercentage
         ]);
-        if ($request->level === 'bs' && is_array($request->eligibleGroupIds)) {
+        if (is_array($request->eligibleGroupIds)) {
             foreach($request->eligibleGroupIds as $gid) {
-                ProgramEligibility::create(['program_id' => $prog->id, 'inter_group_id' => $gid]);
+                if ($request->level === 'bs') {
+                    ProgramEligibility::create(['program_id' => $prog->id, 'inter_group_id' => $gid]);
+                } else {
+                    ProgramEligibility::create(['program_id' => $prog->id, 'matric_group_id' => $gid]);
+                }
             }
         }
         return response()->json(['program' => $prog], 201);
@@ -376,11 +389,15 @@ class AcademicController extends Controller
     {
         Gate::authorize('academic.manage');
         $prog = Program::findOrFail($id);
-        $prog->update($request->only(['name', 'seats', 'min_percentage', 'is_active']));
+        $prog->update($request->only(['name', 'seats', 'min_percentage', 'is_active', 'duration_years', 'total_semesters', 'exam_system']));
         if (is_array($request->eligibleGroupIds)) {
             ProgramEligibility::where('program_id', $id)->delete();
             foreach($request->eligibleGroupIds as $gid) {
-                ProgramEligibility::create(['program_id' => $prog->id, 'inter_group_id' => $gid]);
+                if ($prog->level === 'bs') {
+                    ProgramEligibility::create(['program_id' => $prog->id, 'inter_group_id' => $gid]);
+                } else {
+                    ProgramEligibility::create(['program_id' => $prog->id, 'matric_group_id' => $gid]);
+                }
             }
         }
         return response()->json(['program' => $prog]);

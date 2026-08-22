@@ -29,12 +29,18 @@ class ProgramEligibility extends Model
 
 	protected $casts = [
 		'program_id' => 'int',
-		'inter_group_id' => 'int'
+		'inter_group_id' => 'int',
+		'matric_group_id' => 'int'
 	];
 
 	public function inter_group()
 	{
 		return $this->belongsTo(InterGroup::class);
+	}
+
+	public function matric_group()
+	{
+		return $this->belongsTo(MatricGroup::class);
 	}
 
 	public function program()

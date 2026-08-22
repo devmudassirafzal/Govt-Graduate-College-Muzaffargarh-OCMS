@@ -23,6 +23,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/designations/{id}', [AcademicController::class, 'updateDesignation']);
         Route::delete('/designations/{id}', [AcademicController::class, 'deleteDesignation']);
 
+        Route::get('/matric-groups', [AcademicController::class, 'getMatricGroups']);
         Route::get('/inter-groups', [AcademicController::class, 'getInterGroups']);
         Route::post('/inter-groups', [AcademicController::class, 'storeInterGroup']);
         Route::put('/inter-groups/{id}', [AcademicController::class, 'updateInterGroup']);

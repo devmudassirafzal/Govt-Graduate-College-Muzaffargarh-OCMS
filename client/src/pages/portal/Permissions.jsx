@@ -75,6 +75,7 @@ function PermissionsMatrix({ matrix, loadMatrix, flash, confirm }) {
   
   const [permQ, setPermQ] = useState('');
   const [userQ, setUserQ] = useState('');
+  const [isTimeLimited, setIsTimeLimited] = useState(false);
   const [expiresAt, setExpiresAt] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -148,11 +149,22 @@ function PermissionsMatrix({ matrix, loadMatrix, flash, confirm }) {
       } else {
         const userIds = Array.from(selectedUsers);
         const action = has ? 'revoke' : 'grant';
+        
+        let finalExpiresAt = null;
+        if (isTimeLimited) {
+          if (!expiresAt) {
+            setBusy(false);
+            return flash({ type: 'error', text: 'Please select a date and time for the limited permission.' });
+          }
+          // datetime-local doesn't include timezone. Parse it as local time, then convert to ISO string (UTC) for the backend.
+          finalExpiresAt = new Date(expiresAt).toISOString();
+        }
+
         const payload = {
           userIds,
           permission: perm.name,
           action,
-          expiresAt: expiresAt || null
+          expiresAt: finalExpiresAt
         };
         const r = await api.post('/admin/users/bulk-permissions', payload);
         flash({ type: 'ok', text: r.data.message });
@@ -254,9 +266,15 @@ function PermissionsMatrix({ matrix, loadMatrix, flash, confirm }) {
             ) : (
               <div className="flex flex-col gap-2">
                 <span>Changes apply <b>directly</b> to the {selectedUsers.size} selected users.</span>
-                <Field label="Expiration Date & Time (Optional)">
-                  <Input type="datetime-local" value={expiresAt} onChange={(e) => setExpiresAt(e.target.value)} />
-                </Field>
+                <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                  <input type="checkbox" checked={isTimeLimited} onChange={(e) => setIsTimeLimited(e.target.checked)} className="h-4 w-4 accent-primary" />
+                  Time Limited (Auto-Expire)
+                </label>
+                {isTimeLimited && (
+                  <Field label="Expiration Date & Time">
+                    <Input type="datetime-local" value={expiresAt} onChange={(e) => setExpiresAt(e.target.value)} />
+                  </Field>
+                )}
               </div>
             )}
           </div>

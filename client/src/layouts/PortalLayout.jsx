@@ -225,7 +225,7 @@ export default function PortalLayout() {
     const checkExpirations = () => {
       const now = Date.now();
       if (expDates.some(time => time <= now)) {
-        window.location.reload();
+        window.location.href = '/portal';
       }
     };
     
