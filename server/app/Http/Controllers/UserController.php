@@ -30,7 +30,10 @@ class UserController extends Controller
     {
         Gate::authorize('staff.manage');
         
-        $q = User::with(['roles', 'student.program', 'teacher.department'])->take(50)->orderBy('name', 'asc');
+        $q = User::with(['roles', 'student.program', 'teacher.department'])->orderBy('name', 'asc');
+        if (!$request->role && !$request->q) {
+            $q->take(50); // limit to 50 only on default empty load to save resources
+        }
         
         if ($request->q) {
             $q->where(function($query) use ($request) {
