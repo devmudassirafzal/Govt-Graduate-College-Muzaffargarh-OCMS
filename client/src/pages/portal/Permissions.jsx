@@ -74,6 +74,7 @@ function PermissionsMatrix({ matrix, loadMatrix, flash, confirm }) {
   const [directPermsMap, setDirectPermsMap] = useState({}); // userId -> [permIds]
   
   const [permQ, setPermQ] = useState('');
+  const [userQ, setUserQ] = useState('');
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -100,6 +101,16 @@ function PermissionsMatrix({ matrix, loadMatrix, flash, confirm }) {
     };
     loadSelected();
   }, [applyToAll, selectedUsers]);
+
+  const filteredUsers = useMemo(() => {
+    if (!users) return null;
+    const needle = userQ.trim().toLowerCase();
+    if (!needle) return users;
+    return users.filter(u => 
+      u.name.toLowerCase().includes(needle) || 
+      u.email.toLowerCase().includes(needle)
+    );
+  }, [users, userQ]);
 
   const groups = useMemo(() => {
     const needle = permQ.trim().toLowerCase();
@@ -196,18 +207,25 @@ function PermissionsMatrix({ matrix, loadMatrix, flash, confirm }) {
 
           {!applyToAll && (
             <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-2">
-              <div className="mb-2 flex items-center justify-between px-2 text-xs font-semibold text-slate-500">
-                <span>Users ({users?.length ?? 0})</span>
-                {selectedUsers.size > 0 && <button className="text-primary hover:underline" onClick={() => setSelectedUsers(new Set())}>Clear</button>}
+              <div className="mb-2 flex flex-col gap-2 px-2">
+                <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
+                  <span>Users ({filteredUsers?.length ?? 0} of {users?.length ?? 0})</span>
+                  {selectedUsers.size > 0 && <button className="text-primary hover:underline" onClick={() => setSelectedUsers(new Set())}>Clear selection</button>}
+                </div>
+                <Input placeholder="Search users by name or email..." value={userQ} onChange={(e) => setUserQ(e.target.value)} style={{ padding: '0.3rem 0.5rem', fontSize: '0.75rem' }} />
               </div>
               <div className="max-h-60 space-y-1 overflow-y-auto">
                 {users === null && <p className="py-4 text-center text-xs text-slate-400">Loading…</p>}
-                {users?.map(u => (
-                  <label key={u.id} className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 hover:bg-white">
-                    <input type="checkbox" checked={selectedUsers.has(u.id)} onChange={() => toggleUserSelection(u.id)} className="h-3.5 w-3.5 rounded border-slate-300 accent-primary" />
-                    <span className="truncate text-sm text-slate-700">{u.name}</span>
+                {filteredUsers?.map(u => (
+                  <label key={u.id} className="flex cursor-pointer items-start gap-2 rounded px-2 py-1.5 hover:bg-white">
+                    <input type="checkbox" checked={selectedUsers.has(u.id)} onChange={() => toggleUserSelection(u.id)} className="mt-0.5 h-3.5 w-3.5 rounded border-slate-300 accent-primary" />
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-medium text-slate-700">{u.name}</div>
+                      <div className="truncate text-[10px] text-slate-400">{u.email}</div>
+                    </div>
                   </label>
                 ))}
+                {filteredUsers !== null && filteredUsers.length === 0 && <p className="py-4 text-center text-xs text-slate-400">No users match.</p>}
               </div>
             </div>
           )}
