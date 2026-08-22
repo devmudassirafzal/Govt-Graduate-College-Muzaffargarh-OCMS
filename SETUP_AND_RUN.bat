@@ -221,6 +221,9 @@ $sqlDump = Join-Path $Root 'ggcm_ocms_v2_data.sql'
 $isDbEmpty = $true
 
 if (Test-MySqlServing) {
+  $savedPref = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  
   # Get first working mysql exe
   $mysqlExe = $null
   foreach ($exe in $mysqlCandidates) {
@@ -236,7 +239,7 @@ if (Test-MySqlServing) {
   
   if ($isDbEmpty) {
     Info "Fresh install detected. Creating database and importing $sqlDump (this may take a moment)..."
-    & $mysqlExe -u root -e "DROP DATABASE IF EXISTS $dbName; CREATE DATABASE $dbName CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+    & $mysqlExe -u root -e "DROP DATABASE IF EXISTS $dbName; CREATE DATABASE $dbName CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>&1 | Out-Null
     if (Test-Path $sqlDump) {
       cmd /c "`"$mysqlExe`" -u root $dbName < `"$sqlDump`""
       OK 'Database restored from dump successfully.'
@@ -246,6 +249,8 @@ if (Test-MySqlServing) {
   } else {
     OK "Database already populated. Skipping full dump import."
   }
+  
+  $ErrorActionPreference = $savedPref
 }
 
 Info 'Applying migrations to ensure schema is up to date...'
