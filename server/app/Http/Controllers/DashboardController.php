@@ -79,7 +79,7 @@ class DashboardController extends Controller
         }
 
         if (in_array('student', $roles)) {
-            $student = Student::with(['program', 'classSection', 'carryForwards' => function($q) {
+            $student = Student::with(['program.level', 'classSection', 'carryForwards' => function($q) {
                 $q->where('status', 'pending')->with('subject');
             }])->where('user_id', $request->user()->id)->first();
 
@@ -103,8 +103,8 @@ class DashboardController extends Controller
                 if ($student->status === 'passed_out') {
                     $currentClass = 'Passed out';
                 } elseif ($termNo) {
-                    if ($student->program->level === 'intermediate') {
-                        $currentClass = ($termNo == 1 ? '1st' : '2nd') . ' Year';
+                    if ($student->program->default_exam_system === 'annual') {
+                        $currentClass = $termNo == 1 ? '1st Year' : ($termNo . 'th Year');
                     } else {
                         $currentClass = 'Semester ' . $termNo;
                     }
@@ -117,7 +117,7 @@ class DashboardController extends Controller
                     'booksOut' => $booksOut,
                     'currentClass' => $currentClass,
                     'carryPapers' => $student->carryForwards->map(function($c) use ($student) {
-                        $fromLabel = $student->program->level === 'intermediate' 
+                        $fromLabel = $student->program->level->default_exam_system === 'annual' 
                             ? ($c->from_term_no == 1 ? '1st' : '2nd') . ' Year' 
                             : 'Semester ' . $c->from_term_no;
                         return [

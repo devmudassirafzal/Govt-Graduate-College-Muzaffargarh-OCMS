@@ -13,6 +13,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Academic Routes
     Route::prefix('academic')->group(function () {
+        Route::get('/program-levels', [AcademicController::class, 'getLevels']);
+        Route::post('/program-levels', [AcademicController::class, 'storeLevel']);
+        Route::put('/program-levels/{id}', [AcademicController::class, 'updateLevel']);
+        Route::delete('/program-levels/{id}', [AcademicController::class, 'deleteLevel']);
+
         Route::get('/departments', [AcademicController::class, 'getDepartments']);
         Route::post('/departments', [AcademicController::class, 'storeDepartment']);
         Route::put('/departments/{id}', [AcademicController::class, 'updateDepartment']);

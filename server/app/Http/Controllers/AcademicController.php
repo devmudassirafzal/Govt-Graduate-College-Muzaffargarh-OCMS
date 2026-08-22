@@ -29,6 +29,34 @@ class AcademicController extends Controller
         return in_array('admin', $roles) || in_array('principal', $roles);
     }
 
+    // ── Program Levels ──
+    public function getLevels()
+    {
+        return response()->json(['levels' => \App\Models\ProgramLevel::orderBy('id', 'asc')->get()]);
+    }
+
+    public function storeLevel(Request $request)
+    {
+        Gate::authorize('academic.manage');
+        $lvl = \App\Models\ProgramLevel::create($request->all());
+        return response()->json(['level' => $lvl], 201);
+    }
+
+    public function updateLevel(Request $request, $id)
+    {
+        Gate::authorize('academic.manage');
+        $lvl = \App\Models\ProgramLevel::findOrFail($id);
+        $lvl->update($request->all());
+        return response()->json(['level' => $lvl]);
+    }
+
+    public function deleteLevel($id)
+    {
+        Gate::authorize('academic.manage');
+        \App\Models\ProgramLevel::findOrFail($id)->delete();
+        return response()->json(['message' => 'Level deleted.']);
+    }
+
     // ── Departments ──
     public function getDepartments()
     {
@@ -167,38 +195,36 @@ class AcademicController extends Controller
     // ── Document Types ──
     public function getDocumentTypes()
     {
-        return response()->json(['documentTypes' => DocumentType::orderBy('id', 'asc')->get()]);
+        return response()->json(['documentTypes' => DocumentType::with('programLevels')->orderBy('id', 'asc')->get()]);
     }
 
     public function storeDocumentType(Request $request)
     {
         Gate::authorize('academic.manage');
-        $request->validate([
-            'name' => 'required',
-            'appliesTo' => 'required|in:intermediate,bs,both'
-        ]);
+        $request->validate(['name' => 'required']);
         $doc = DocumentType::create([
             'name' => $request->name,
-            'applies_to' => $request->appliesTo,
             'is_required' => $request->isRequired !== false
         ]);
-        return response()->json(['documentType' => $doc], 201);
+        if (is_array($request->programLevelIds)) {
+            $doc->programLevels()->sync($request->programLevelIds);
+        }
+        return response()->json(['documentType' => $doc->load('programLevels')], 201);
     }
 
     public function updateDocumentType(Request $request, $id)
     {
         Gate::authorize('academic.manage');
-        if ($request->has('appliesTo') && !in_array($request->appliesTo, ['intermediate', 'bs', 'both'])) {
-            return response()->json(['message' => 'Applies-to must be intermediate, bs, or both.'], 422);
-        }
         $doc = DocumentType::findOrFail($id);
         $doc->update([
             'name' => $request->name ?? $doc->name,
-            'applies_to' => $request->appliesTo ?? $doc->applies_to,
             'is_required' => $request->has('isRequired') ? $request->isRequired : $doc->is_required,
             'is_active' => $request->has('isActive') ? $request->isActive : $doc->is_active
         ]);
-        return response()->json(['documentType' => $doc]);
+        if (is_array($request->programLevelIds)) {
+            $doc->programLevels()->sync($request->programLevelIds);
+        }
+        return response()->json(['documentType' => $doc->load('programLevels')]);
     }
 
     public function deleteDocumentType($id)
@@ -283,7 +309,7 @@ class AcademicController extends Controller
     // ── Admission Cycles ──
     public function getCycles()
     {
-        return response()->json(['cycles' => AdmissionCycle::with('academicSession')->orderBy('id', 'desc')->get()]);
+        return response()->json(['cycles' => AdmissionCycle::with(['academicSession', 'level'])->orderBy('id', 'desc')->get()]);
     }
 
     public function storeCycle(Request $request)
@@ -291,12 +317,12 @@ class AcademicController extends Controller
         Gate::authorize('academic.manage');
         // Very complex cycle creation logic ...
         // (Truncated to avoid exhausting tokens: we'll implement it faithfully)
-        $spans = ['bs' => 4, 'intermediate' => 2];
-        if (!isset($spans[$request->level])) return response()->json(['message' => 'Select a valid level.'], 422);
+        $level = \App\Models\ProgramLevel::find($request->programLevelId);
+        if (!$level) return response()->json(['message' => 'Select a valid program level.'], 422);
         if (!$request->academicSessionId && !$request->sessionName) return response()->json(['message' => 'Enter the session years.'], 422);
         
-        $need = $spans[$request->level];
-        $levelName = $request->level === 'bs' ? 'BS' : 'Intermediate';
+        $need = $level->default_exam_system === 'annual' ? 2 : 4;
+        $levelName = $level->name;
 
         $session = null;
         if ($request->sessionName) {
@@ -322,7 +348,7 @@ class AcademicController extends Controller
 
         $cycle = AdmissionCycle::create([
             'academic_session_id' => $session->id,
-            'level' => $request->level,
+            'program_level_id' => $level->id,
             'title' => trim($request->title),
             'start_at' => $request->startAt,
             'end_at' => $request->endAt,
@@ -350,22 +376,22 @@ class AcademicController extends Controller
     public function getPrograms()
     {
         return response()->json([
-            'programs' => Program::with(['department', 'interGroup', 'programEligibilities.interGroup', 'programEligibilities.matricGroup'])
-                                 ->orderBy('level', 'desc')->orderBy('name', 'asc')->get()
+            'programs' => Program::with(['department', 'interGroup', 'programEligibilities.interGroup', 'programEligibilities.matricGroup', 'level'])
+                                 ->orderBy('program_level_id', 'desc')->orderBy('name', 'asc')->get()
         ]);
     }
 
     public function storeProgram(Request $request)
     {
         Gate::authorize('academic.manage');
-        if (!in_array($request->level, ['bs', 'intermediate', 'diploma'])) {
-            return response()->json(['message' => "Invalid program level."], 422);
-        }
+        $level = \App\Models\ProgramLevel::find($request->programLevelId);
+        if (!$level) return response()->json(['message' => "Invalid program level."], 422);
+        
         $prog = Program::create([
             'name' => $request->name,
             'code' => $request->code,
-            'level' => $request->level,
-            'exam_system' => $request->exam_system ?: ($request->level === 'bs' ? 'semester' : 'annual'),
+            'program_level_id' => $level->id,
+            'exam_system' => $request->exam_system ?: $level->default_exam_system,
             'department_id' => $request->departmentId,
             'inter_group_id' => $request->interGroupId,
             'duration_years' => $request->durationYears,
@@ -375,9 +401,9 @@ class AcademicController extends Controller
         ]);
         if (is_array($request->eligibleGroupIds)) {
             foreach($request->eligibleGroupIds as $gid) {
-                if ($request->level === 'bs') {
+                if ($level->prerequisite_type === 'inter_groups') {
                     ProgramEligibility::create(['program_id' => $prog->id, 'inter_group_id' => $gid]);
-                } else {
+                } else if ($level->prerequisite_type === 'matric_groups') {
                     ProgramEligibility::create(['program_id' => $prog->id, 'matric_group_id' => $gid]);
                 }
             }
@@ -393,9 +419,9 @@ class AcademicController extends Controller
         if (is_array($request->eligibleGroupIds)) {
             ProgramEligibility::where('program_id', $id)->delete();
             foreach($request->eligibleGroupIds as $gid) {
-                if ($prog->level === 'bs') {
+                if ($prog->level->prerequisite_type === 'inter_groups') {
                     ProgramEligibility::create(['program_id' => $prog->id, 'inter_group_id' => $gid]);
-                } else {
+                } else if ($prog->level->prerequisite_type === 'matric_groups') {
                     ProgramEligibility::create(['program_id' => $prog->id, 'matric_group_id' => $gid]);
                 }
             }

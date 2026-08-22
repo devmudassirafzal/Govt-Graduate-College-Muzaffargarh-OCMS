@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Model;
  * 
  * @property int $id
  * @property string $name
- * @property string $applies_to
  * @property bool $is_required
  * @property bool $is_active
  * 
@@ -36,12 +35,16 @@ class DocumentType extends Model
 
 	protected $fillable = [
 		'name',
-		'applies_to',
 		'is_required',
 		'is_active'
 	];
 
-	public function application_documents()
+	public function programLevels()
+	{
+		return $this->belongsToMany(ProgramLevel::class, 'document_type_program_level');
+	}
+
+	public function applicationDocuments()
 	{
 		return $this->hasMany(ApplicationDocument::class);
 	}

@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  * 
  * @property int $id
  * @property int $academic_session_id
- * @property string $level
+ * @property int|null $program_level_id
  * @property string $title
  * @property Carbon $start_at
  * @property Carbon $end_at
@@ -51,7 +51,7 @@ class AdmissionCycle extends Model
 
 	protected $fillable = [
 		'academic_session_id',
-		'level',
+		'program_level_id',
 		'title',
 		'start_at',
 		'end_at',
@@ -65,6 +65,11 @@ class AdmissionCycle extends Model
 	public function academic_session()
 	{
 		return $this->belongsTo(AcademicSession::class);
+	}
+
+	public function level()
+	{
+		return $this->belongsTo(ProgramLevel::class, 'program_level_id');
 	}
 
 	public function applications()

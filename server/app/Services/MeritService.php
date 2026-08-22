@@ -28,8 +28,15 @@ class MeritService
     public static function computeMeritScore($app, $cycle, $level)
     {
         $hafizBonus = $cycle->hafiz_bonus ?? SettingService::getNumber('merit.hafiz_bonus', 20);
-        if ($level === 'intermediate') return self::matricPct($app, $hafizBonus);
         
+        if ($level->merit_rule === 'matric_only') {
+            return self::matricPct($app, $hafizBonus);
+        }
+        
+        if ($level->merit_rule === 'inter_only') {
+            return self::interPct($app);
+        }
+
         $wMatric = (float) ($cycle->merit_w_matric ?? SettingService::getNumber('merit.w_matric', 0.3));
         $wInter = (float) ($cycle->merit_w_inter ?? SettingService::getNumber('merit.w_inter', 0.7));
         

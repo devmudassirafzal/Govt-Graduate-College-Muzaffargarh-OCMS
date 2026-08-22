@@ -3,7 +3,7 @@ import api from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Table, Badge, Button, Input, Select, Modal, Field, Textarea, useFlash, errText, fmtDate } from '../../components/ui';
 
-const TABS = ['Departments', 'Programs', 'Subjects', 'Class Shifts', 'Allocations', 'Sessions', 'Cycles', 'Designations', 'Inter-Groups', 'Document Types'];
+const TABS = ['Program Levels', 'Departments', 'Programs', 'Subjects', 'Class Shifts', 'Allocations', 'Sessions', 'Cycles', 'Designations', 'Inter-Groups', 'Document Types'];
 
 export default function Academic() {
   const { user, can } = useAuth();
@@ -23,17 +23,19 @@ export default function Academic() {
   const [flash, flashEl] = useFlash();
 
   const load = async () => {
-    const [dep, prog, subj, sect, alloc, sess, cyc, groups, teach, desig, docs, matricGroups] = await Promise.all([
+    const [dep, prog, subj, sect, alloc, sess, cyc, groups, teach, desig, docs, matricGroups, levels] = await Promise.all([
       api.get('/academic/departments'), api.get('/academic/programs'), api.get('/academic/subjects'),
       api.get('/academic/sections'), api.get('/academic/allocations'), api.get('/academic/sessions'),
       api.get('/academic/cycles'), api.get('/academic/inter-groups'), api.get('/teachers', { params: { all: 1 } }),
-      api.get('/academic/designations'), api.get('/academic/document-types'), api.get('/academic/matric-groups')
+      api.get('/academic/designations'), api.get('/academic/document-types'), api.get('/academic/matric-groups'),
+      api.get('/academic/program-levels')
     ]);
     setData({
       departments: dep.data.departments, programs: prog.data.programs, subjects: subj.data.subjects,
       sections: sect.data.sections, allocations: alloc.data.allocations, sessions: sess.data.sessions,
       cycles: cyc.data.cycles, interGroups: groups.data.interGroups, teachers: teach.data.teachers,
-      designations: desig.data.designations, documentTypes: docs.data.documentTypes, matricGroups: matricGroups.data.matricGroups
+      designations: desig.data.designations, documentTypes: docs.data.documentTypes, matricGroups: matricGroups.data.matricGroups,
+      programLevels: levels.data.levels
     });
   };
   useEffect(() => { load(); }, []);
@@ -84,7 +86,8 @@ export default function Academic() {
   // level's span; the server reuses the matching session or creates it.
   // Dates are date-only: the cycle opens at 00:00 and closes at 23:59 local.
   const localDateStr = (dt) => dt.toLocaleDateString('en-CA'); // YYYY-MM-DD in local time
-  const cycleSpan = form.level === 'intermediate' ? 2 : 4;
+  const selectedCycleLevel = (d.programLevels ?? []).find((l) => String(l.id) === String(form.programLevelId));
+  const cycleSpan = selectedCycleLevel?.defaultExamSystem === 'annual' ? 2 : 4;
   const parseSessionText = (text) => {
     const m = /^\s*(\d{4})\s*[-–]\s*(\d{4})\s*$/.exec(text ?? '');
     return m ? { startYear: Number(m[1]), endYear: Number(m[2]) } : null;
@@ -94,21 +97,22 @@ export default function Academic() {
   const cycleSessionSuggestions = (d.sessions ?? [])
     .filter((s) => Number(s.endYear) - Number(s.startYear) === cycleSpan)
     .map((s) => `${s.startYear}-${s.endYear}`);
-  const cycleAutoTitle = (level, startYear) =>
-    startYear ? `${level === 'intermediate' ? 'Intermediate' : 'BS'} Admissions ${startYear}` : '';
-  const isAutoTitle = (t) => !t || /^(BS|Intermediate) Admissions \d{4}$/.test(t);
+  const cycleAutoTitle = (levelName, startYear) =>
+    startYear ? `${levelName} Admissions ${startYear}` : '';
+  const isAutoTitle = (t) => !t || /^.+ Admissions \d{4}$/.test(t);
 
   const onCycleLevel = (e) => {
-    const level = e.target.value;
-    const span = level === 'intermediate' ? 2 : 4;
-    // Level switch re-derives the end year (BS 4 / Inter 2) from the same start year.
+    const levelId = e.target.value;
+    const lvl = (d.programLevels ?? []).find((l) => String(l.id) === String(levelId));
+    const span = lvl?.defaultExamSystem === 'annual' ? 2 : 4;
+    // Level switch re-derives the end year from the same start year.
     const years = parseSessionText(form.sessionName);
     const sessionName = years ? `${years.startYear}-${years.startYear + span}` : form.sessionName;
     setForm({
       ...form,
-      level,
+      programLevelId: levelId,
       sessionName,
-      title: isAutoTitle(form.title) ? cycleAutoTitle(level, years?.startYear) : form.title,
+      title: isAutoTitle(form.title) ? cycleAutoTitle(lvl?.name ?? '', years?.startYear) : form.title,
     });
   };
   const onCycleSession = (e) => {
@@ -116,25 +120,26 @@ export default function Academic() {
     const prev = form.sessionName ?? '';
     // Typed the 4-digit start year → auto-complete the end year for this level
     // (only while typing forward, so backspacing doesn't fight the user).
-    if (form.level && /^\d{4}$/.test(text) && text.length > prev.length) {
+    if (form.programLevelId && /^\d{4}$/.test(text) && text.length > prev.length) {
       text = `${text}-${Number(text) + cycleSpan}`;
     }
+    const lvl = (d.programLevels ?? []).find((l) => String(l.id) === String(form.programLevelId));
     setForm({
       ...form,
       sessionName: text,
-      title: isAutoTitle(form.title) ? cycleAutoTitle(form.level, parseSessionText(text)?.startYear) : form.title,
+      title: isAutoTitle(form.title) ? cycleAutoTitle(lvl?.name ?? '', parseSessionText(text)?.startYear) : form.title,
     });
   };
-  const cycleSessionError = !form.level ? null
+  const cycleSessionError = !form.programLevelId ? null
     : !form.sessionName?.trim() ? 'Type the session start year (e.g. ' + `${new Date().getFullYear()}) — the end year fills in automatically.`
     : !cycleSessionYears ? 'Session must be two years like 2026-2030 (start-end).'
     : cycleSessionYears.endYear - cycleSessionYears.startYear !== cycleSpan
-      ? `${form.level === 'bs' ? 'BS' : 'Intermediate'} programs run ${cycleSpan} years — ${cycleSessionYears.startYear}-${cycleSessionYears.endYear} spans ${cycleSessionYears.endYear - cycleSessionYears.startYear}. Use ${cycleSessionYears.startYear}-${cycleSessionYears.startYear + cycleSpan}.`
+      ? `${selectedCycleLevel?.name ?? ''} programs run ${cycleSpan} years — ${cycleSessionYears.startYear}-${cycleSessionYears.endYear} spans ${cycleSessionYears.endYear - cycleSessionYears.startYear}. Use ${cycleSessionYears.startYear}-${cycleSessionYears.startYear + cycleSpan}.`
       : null;
   const cycleErrors = modal === 'cycle' ? [
-    !form.level && 'Select a level (Intermediate or BS).',
+    !form.programLevelId && 'Select a level.',
     !editItem && cycleSessionError,
-    form.level && (!form.title || form.title.trim().length < 3) && 'Enter a title (at least 3 characters).',
+    form.programLevelId && (!form.title || form.title.trim().length < 3) && 'Enter a title (at least 3 characters).',
     !form.startAt && 'Set the opening date.',
     !form.endAt && 'Set the closing date.',
     form.startAt && form.endAt && form.endAt < form.startAt && 'The closing date must be on or after the opening date.',
@@ -186,16 +191,16 @@ export default function Academic() {
 
       {/* ── Programs ─────────────────────────────────────────────── */}
       {tab === 'Programs' && (
-        <Card title="Programs (BS + Intermediate)" actions={canManage && <Button onClick={() => openCreate('program', { level: 'bs', durationYears: 4, totalSemesters: 8, seats: 50, minPercentage: 60, eligibleGroupIds: [] })}>+ Add</Button>}>
+        <Card title="Programs" actions={canManage && <Button onClick={() => openCreate('program', { durationYears: 4, totalSemesters: 8, seats: 50, minPercentage: 60, eligibleGroupIds: [] })}>+ Add</Button>}>
           <Table columns={[
             { header: 'Code', cell: (x) => <span className="font-semibold text-primary">{x.code}</span> },
             { header: 'Name', cell: (x) => x.name },
-            { header: 'Level', cell: (x) => <Badge value={x.level} /> },
+            { header: 'Level', cell: (x) => <Badge value={x.level?.name ?? x.level} /> },
             { header: 'Seats', cell: (x) => x.seats },
             { header: 'Min %', cell: (x) => Number(x.minPercentage) },
-            { header: 'Eligible groups', cell: (x) => x.level === 'bs' ? (x.programEligibilities || []).map((e) => e.interGroup.code).join(', ') : x.interGroup?.name ?? '—' },
+            { header: 'Eligible groups', cell: (x) => x.level?.prerequisiteType === 'inter_groups' ? (x.programEligibilities || []).map((e) => e.interGroup?.code).join(', ') : x.level?.prerequisiteType === 'matric_groups' ? (x.programEligibilities || []).map((e) => e.matricGroup?.name).join(', ') : '—' },
             { header: 'Active', cell: (x) => <Badge value={x.isActive ? 'active' : 'closed'} /> },
-            { header: 'Actions', cell: (x) => <RowActions onEdit={() => openEdit('program', { ...x, eligibleGroupIds: (x.programEligibilities || []).map((e) => e.interGroupId) })} deleteUrl={`/academic/programs/${x.id}`} label="Program" /> },
+            { header: 'Actions', cell: (x) => <RowActions onEdit={() => openEdit('program', { ...x, programLevelId: x.programLevelId ?? x.level?.id, eligibleGroupIds: (x.programEligibilities || []).map((e) => e.interGroupId ?? e.matricGroupId) })} deleteUrl={`/academic/programs/${x.id}`} label="Program" /> },
           ]} rows={d.programs} />
         </Card>
       )}
@@ -378,15 +383,31 @@ export default function Academic() {
         </Card>
       )}
 
+      {/* ── Program Levels ───────────────────────────────────────── */}
+      {tab === 'Program Levels' && (
+        <Card title="Program Levels" actions={canManage && <Button onClick={() => openCreate('programLevel', { defaultExamSystem: 'semester', prerequisiteType: 'inter_groups', isActive: true })}>+ Add Level</Button>}>
+          <p className="mb-3 text-sm text-slate-500">Define admissible program levels (e.g. BS, Intermediate, Diploma). These are used throughout the system for programs, admission cycles, and document types.</p>
+          <Table columns={[
+            { header: 'Name', cell: (x) => <span className="font-semibold text-primary">{x.name}</span> },
+            { header: 'Merit Rule', cell: (x) => <Badge value={x.meritRule ?? 'combined'} /> },
+            { header: 'Prerequisite', cell: (x) => <Badge value={x.prerequisiteType} /> },
+            { header: 'Exam System', cell: (x) => <Badge value={x.defaultExamSystem} /> },
+            { header: 'Min Age', cell: (x) => x.minAge ?? '—' },
+            { header: 'Active', cell: (x) => x.isActive ? <Badge value="active" /> : <Badge value="inactive" /> },
+            { header: 'Actions', cell: (x) => <RowActions onEdit={() => openEdit('programLevel', x)} deleteUrl={`/academic/program-levels/${x.id}`} label="Program Level" /> },
+          ]} rows={d.programLevels ?? []} empty="No levels yet. Add at least one level to enable programs and admissions." />
+        </Card>
+      )}
+
       {/* ── Document Types ───────────────────────────────────────── */}
       {tab === 'Document Types' && (
-        <Card title="Admission Document Types" actions={canManage && <Button onClick={() => openCreate('documentType', { appliesTo: 'both', isRequired: true })}>+ Add</Button>}>
+        <Card title="Admission Document Types" actions={canManage && <Button onClick={() => openCreate('documentType', { isRequired: true, programLevelIds: [] })}>+ Add</Button>}>
           <Table columns={[
             { header: 'Name', cell: (x) => <span className="font-semibold">{x.name}</span> },
-            { header: 'Applies to', cell: (x) => <Badge value={x.appliesTo} /> },
+            { header: 'Applies to', cell: (x) => (x.programLevels ?? []).map(l => l.name).join(', ') || <span className="text-slate-400">—</span> },
             { header: 'Required', cell: (x) => x.isRequired ? <Badge value="required" /> : 'optional' },
             { header: 'Active', cell: (x) => x.isActive ? <Badge value="active" /> : 'inactive' },
-            { header: 'Actions', cell: (x) => <RowActions onEdit={() => openEdit('documentType', x)} deleteUrl={`/academic/document-types/${x.id}`} label="Document type" /> },
+            { header: 'Actions', cell: (x) => <RowActions onEdit={() => openEdit('documentType', { ...x, programLevelIds: (x.programLevels ?? []).map(l => l.id) })} deleteUrl={`/academic/document-types/${x.id}`} label="Document type" /> },
           ]} rows={d.documentTypes} empty="No document types yet — add what applicants must upload (e.g. Matric Certificate, CNIC/B-Form). Required ones drive clerk verification." />
         </Card>
       )}
@@ -419,94 +440,140 @@ export default function Academic() {
         </div>
       </Modal>
 
-      {/* ────── Program modal ────── */}
-      <Modal open={modal === 'program'} wide title={editItem ? 'Edit Program' : 'Add Program'} onClose={() => setModal(null)}>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Name"><Input value={form.name ?? ''} onChange={set('name')} /></Field>
-          <Field label="Code"><Input value={form.code ?? ''} onChange={set('code')} disabled={!!editItem} /></Field>
-          {!editItem && (
-            <Field label="Level">
-              <Select value={form.level ?? ''} onChange={(e) => setForm({ 
-                ...form, 
-                level: e.target.value, 
-                exam_system: e.target.value === 'bs' ? 'semester' : (e.target.value === 'diploma' ? 'semester' : 'annual'),
-                durationYears: e.target.value === 'bs' ? 4 : 2, 
-                totalSemesters: e.target.value === 'bs' ? 8 : (e.target.value === 'diploma' ? 4 : ''), 
-                minPercentage: e.target.value === 'bs' ? 60 : 50 
-              })}>
-                <option value="">Select…</option>
-                <option value="bs">BS / Bachelor</option>
-                <option value="diploma">Diploma (e.g. DIT)</option>
-                <option value="intermediate">Intermediate (e.g. FSc/ICS)</option>
-              </Select>
-            </Field>
-          )}
-          <Field label="Exam System">
-            <Select value={form.exam_system ?? 'semester'} onChange={set('exam_system')}>
-              <option value="semester">Semester System</option>
-              <option value="annual">Annual System</option>
+      {/* ────── Program Level modal ────── */}
+      <Modal open={modal === 'programLevel'} title={editItem ? 'Edit Program Level' : 'Add Program Level'} onClose={() => setModal(null)}>
+        <div className="space-y-3">
+          <Field label="Name (e.g. BS, Intermediate, Diploma)"><Input value={form.name ?? ''} onChange={set('name')} /></Field>
+          <Field label="Merit Rule" hint="How merit score is calculated for this level.">
+            <Select value={form.meritRule ?? 'combined'} onChange={set('meritRule')}>
+              <option value="combined">Combined (Matric + Inter weighted)</option>
+              <option value="matric_only">Matric Only</option>
+              <option value="inter_only">Intermediate Only</option>
             </Select>
           </Field>
-          <Field label="Duration (Years)">
-            <Input type="number" value={form.durationYears ?? ''} onChange={set('durationYears')} />
+          <Field label="Prerequisite Type" hint="What prior qualification applicants need.">
+            <Select value={form.prerequisiteType ?? 'inter_groups'} onChange={set('prerequisiteType')}>
+              <option value="inter_groups">Intermediate Groups (for BS)</option>
+              <option value="matric_groups">Matric Groups (for Intermediate/Diploma)</option>
+              <option value="none">None</option>
+            </Select>
           </Field>
-          {form.exam_system !== 'annual' && (
-            <Field label="Total Semesters">
-              <Input type="number" value={form.totalSemesters ?? ''} onChange={set('totalSemesters')} />
-            </Field>
-          )}
-          {(form.level === 'bs' || editItem?.level === 'bs') ? (
-            <Field label="Department">
-              <Select value={form.departmentId ?? ''} onChange={set('departmentId')}>
-                <option value="">Select…</option>
-                {d.departments.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
-              </Select>
-            </Field>
-          ) : (
-            <Field label="Intermediate/Diploma group">
-              <Select value={form.interGroupId ?? ''} onChange={set('interGroupId')}>
-                <option value="">Select…</option>
-                {d.interGroups.map((g) => (
-                  <option key={g.id} value={g.id}>{g.name}</option>
-                ))}
-              </Select>
-            </Field>
-          )}
-          <Field label="Seats"><Input type="number" value={form.seats ?? ''} onChange={set('seats')} /></Field>
-          <Field label="Minimum % (§6.1)"><Input type="number" value={form.minPercentage ?? ''} onChange={set('minPercentage')} /></Field>
-          {editItem && (
-            <Field label="Status">
-              <Select value={form.isActive ? 'true' : 'false'} onChange={(e) => setForm({ ...form, isActive: e.target.value === 'true' })}>
-                <option value="true">Active</option><option value="false">Closed</option>
-              </Select>
-            </Field>
-          )}
-          {form.level && (
-            <div className="col-span-full">
-              <span className="mb-1 block text-sm font-medium text-slate-700">
-                Eligibility matrix — allowed {form.level === 'bs' ? 'intermediate groups' : 'matric groups'}
-              </span>
-              <div className="flex flex-wrap gap-3">
-                {(form.level === 'bs' ? d.interGroups : (d.matricGroups ?? [])).map((g) => (
-                  <label key={g.id} className="flex items-center gap-1.5 text-sm">
-                    <input type="checkbox" checked={(form.eligibleGroupIds ?? []).includes(g.id)}
-                      onChange={(e) => {
-                        const cur = form.eligibleGroupIds ?? [];
-                        setForm({ ...form, eligibleGroupIds: e.target.checked ? [...cur, g.id] : cur.filter((x) => x !== g.id) });
-                      }} />
-                    {g.name}
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-          <div className="col-span-full flex justify-end gap-2">
+          <Field label="Default Exam System">
+            <Select value={form.defaultExamSystem ?? 'semester'} onChange={set('defaultExamSystem')}>
+              <option value="semester">Semester System</option>
+              <option value="annual">Annual System (Year-based)</option>
+            </Select>
+          </Field>
+          <Field label="Minimum Age" hint="Minimum applicant age (leave blank for no limit)."><Input type="number" value={form.minAge ?? ''} onChange={set('minAge')} /></Field>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.isActive ?? true} onChange={set('isActive')} /> Active</label>
+          <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setModal(null)}>Cancel</Button>
-            <Button onClick={() => submit('/academic/programs', `/academic/programs/${editItem?.id}`, form, 'Program')}>
-              {editItem ? 'Save Changes' : 'Add Program'}
+            <Button onClick={() => submit('/academic/program-levels', `/academic/program-levels/${editItem?.id}`, form, 'Program Level')}>
+              {editItem ? 'Save Changes' : 'Add Level'}
             </Button>
           </div>
         </div>
+      </Modal>
+
+      {/* ────── Program modal ────── */}
+      <Modal open={modal === 'program'} wide title={editItem ? 'Edit Program' : 'Add Program'} onClose={() => setModal(null)}>
+        {(() => {
+          const selLevel = (d.programLevels ?? []).find((l) => String(l.id) === String(form.programLevelId ?? editItem?.programLevelId));
+          const isInterGroups = selLevel?.prerequisiteType === 'inter_groups';
+          const isMatricGroups = selLevel?.prerequisiteType === 'matric_groups';
+          return (
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="Name"><Input value={form.name ?? ''} onChange={set('name')} /></Field>
+              <Field label="Code"><Input value={form.code ?? ''} onChange={set('code')} disabled={!!editItem} /></Field>
+              {!editItem && (
+                <Field label="Level">
+                  <Select value={form.programLevelId ?? ''} onChange={(e) => {
+                    const lvl = (d.programLevels ?? []).find((l) => String(l.id) === e.target.value);
+                    setForm({
+                      ...form,
+                      programLevelId: e.target.value,
+                      exam_system: lvl?.defaultExamSystem ?? 'semester',
+                      durationYears: lvl?.defaultExamSystem === 'annual' ? 2 : 4,
+                      totalSemesters: lvl?.defaultExamSystem === 'semester' ? 8 : '',
+                      minPercentage: 50,
+                      eligibleGroupIds: []
+                    });
+                  }}>
+                    <option value="">Select…</option>
+                    {(d.programLevels ?? []).filter(l => l.isActive).map((l) => (
+                      <option key={l.id} value={l.id}>{l.name}</option>
+                    ))}
+                  </Select>
+                </Field>
+              )}
+              <Field label="Exam System">
+                <Select value={form.exam_system ?? selLevel?.defaultExamSystem ?? 'semester'} onChange={set('exam_system')}>
+                  <option value="semester">Semester System</option>
+                  <option value="annual">Annual System</option>
+                </Select>
+              </Field>
+              <Field label="Duration (Years)">
+                <Input type="number" value={form.durationYears ?? ''} onChange={set('durationYears')} />
+              </Field>
+              {(form.exam_system ?? selLevel?.defaultExamSystem) !== 'annual' && (
+                <Field label="Total Semesters">
+                  <Input type="number" value={form.totalSemesters ?? ''} onChange={set('totalSemesters')} />
+                </Field>
+              )}
+              {isInterGroups ? (
+                <Field label="Department">
+                  <Select value={form.departmentId ?? ''} onChange={set('departmentId')}>
+                    <option value="">Select…</option>
+                    {d.departments.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
+                  </Select>
+                </Field>
+              ) : (
+                <Field label="Group (Inter/Diploma)">
+                  <Select value={form.interGroupId ?? ''} onChange={set('interGroupId')}>
+                    <option value="">Select…</option>
+                    {d.interGroups.map((g) => (
+                      <option key={g.id} value={g.id}>{g.name}</option>
+                    ))}
+                  </Select>
+                </Field>
+              )}
+              <Field label="Seats"><Input type="number" value={form.seats ?? ''} onChange={set('seats')} /></Field>
+              <Field label="Minimum %"><Input type="number" value={form.minPercentage ?? ''} onChange={set('minPercentage')} /></Field>
+              {editItem && (
+                <Field label="Status">
+                  <Select value={form.isActive ? 'true' : 'false'} onChange={(e) => setForm({ ...form, isActive: e.target.value === 'true' })}>
+                    <option value="true">Active</option><option value="false">Closed</option>
+                  </Select>
+                </Field>
+              )}
+              {(isInterGroups || isMatricGroups) && (
+                <div className="col-span-full">
+                  <span className="mb-1 block text-sm font-medium text-slate-700">
+                    Eligibility — allowed {isInterGroups ? 'intermediate groups' : 'matric groups'}
+                  </span>
+                  <div className="flex flex-wrap gap-3">
+                    {(isInterGroups ? d.interGroups : (d.matricGroups ?? [])).map((g) => (
+                      <label key={g.id} className="flex items-center gap-1.5 text-sm">
+                        <input type="checkbox" checked={(form.eligibleGroupIds ?? []).includes(g.id)}
+                          onChange={(e) => {
+                            const cur = form.eligibleGroupIds ?? [];
+                            setForm({ ...form, eligibleGroupIds: e.target.checked ? [...cur, g.id] : cur.filter((x) => x !== g.id) });
+                          }} />
+                        {g.name}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div className="col-span-full flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setModal(null)}>Cancel</Button>
+                <Button onClick={() => submit('/academic/programs', `/academic/programs/${editItem?.id}`, form, 'Program')}>
+                  {editItem ? 'Save Changes' : 'Add Program'}
+                </Button>
+              </div>
+            </div>
+          );
+        })()}
       </Modal>
 
       {/* ────── Subject modal ────── */}
@@ -645,11 +712,12 @@ export default function Academic() {
       {/* ────── Cycle modal ────── */}
       <Modal open={modal === 'cycle'} title={editItem ? 'Edit Admission Cycle' : 'Add Admission Cycle'} onClose={() => setModal(null)}>
         <div className="space-y-3">
-          <Field label="Level" hint={!editItem ? 'BS programs run 4 years; Intermediate (11th–12th) runs 2 years.' : undefined}>
-            <Select value={form.level ?? ''} onChange={onCycleLevel} disabled={!!editItem}>
+          <Field label="Level" hint={!editItem ? 'Select the program level this cycle is for.' : undefined}>
+            <Select value={form.programLevelId ?? ''} onChange={onCycleLevel} disabled={!!editItem}>
               <option value="">Select…</option>
-              <option value="intermediate">Intermediate (2 years)</option>
-              <option value="bs">BS (4 years)</option>
+              {(d.programLevels ?? []).filter(l => l.isActive).map((l) => (
+                <option key={l.id} value={l.id}>{l.name} ({l.defaultExamSystem === 'annual' ? '2-year annual' : '4-year semester'})</option>
+              ))}
             </Select>
           </Field>
           {editItem ? (
@@ -658,15 +726,15 @@ export default function Academic() {
             </Field>
           ) : (
             <Field
-              label={`Session (${cycleSpan}-year ${form.level === 'intermediate' ? 'Intermediate' : 'BS'} batch)`}
-              hint={form.level
-                ? (cycleSessionError ?? `✓ ${cycleSessionYears.startYear}–${cycleSessionYears.endYear} — reused if it already exists, created otherwise.`)
+              label={`Session (${cycleSpan}-year ${selectedCycleLevel?.name ?? ''} batch)`}
+              hint={form.programLevelId
+                ? (cycleSessionError ?? `✓ ${cycleSessionYears?.startYear}–${cycleSessionYears?.endYear} — reused if it already exists, created otherwise.`)
                 : 'Select a level first.'}
             >
               <Input
                 value={form.sessionName ?? ''}
                 onChange={onCycleSession}
-                disabled={!form.level}
+                disabled={!form.programLevelId}
                 placeholder={`Type the start year, e.g. ${new Date().getFullYear()}`}
                 list="cycle-session-suggestions"
               />
@@ -745,12 +813,19 @@ export default function Academic() {
       <Modal open={modal === 'documentType'} title={editItem ? 'Edit Document Type' : 'Add Document Type'} onClose={() => setModal(null)}>
         <div className="space-y-3">
           <Field label="Name (e.g. Matric Certificate)"><Input value={form.name ?? ''} onChange={set('name')} /></Field>
-          <Field label="Applies to">
-            <Select value={form.appliesTo ?? 'both'} onChange={set('appliesTo')}>
-              <option value="both">Both (Intermediate & BS)</option>
-              <option value="intermediate">Intermediate only</option>
-              <option value="bs">BS only</option>
-            </Select>
+          <Field label="Applies to (Program Levels)">
+            <div className="flex flex-wrap gap-3 rounded-lg border border-slate-200 p-3">
+              {(d.programLevels ?? []).map((l) => (
+                <label key={l.id} className="flex items-center gap-1.5 text-sm">
+                  <input type="checkbox" checked={(form.programLevelIds ?? []).includes(l.id)}
+                    onChange={(e) => {
+                      const cur = form.programLevelIds ?? [];
+                      setForm({ ...form, programLevelIds: e.target.checked ? [...cur, l.id] : cur.filter((x) => x !== l.id) });
+                    }} />
+                  {l.name}
+                </label>
+              ))}
+            </div>
           </Field>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.isRequired ?? true} onChange={set('isRequired')} /> Required for verification</label>
           {editItem && (

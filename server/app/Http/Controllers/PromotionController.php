@@ -18,12 +18,18 @@ class PromotionController extends Controller
 {
     private function finalTermOf($program)
     {
-        return $program->level === 'intermediate' ? ($program->total_semesters ?? 2) : ($program->total_semesters ?? 8);
+        return $program->level->default_exam_system === 'annual' ? ($program->duration_years ?? 2) : ($program->total_semesters ?? 8);
     }
 
     private function classLabel($level, $termNo)
     {
-        return $level === 'intermediate' ? ($termNo === 1 ? '1st Year' : '2nd Year') : "Semester {$termNo}";
+        if ($level->default_exam_system === 'annual') {
+            if ($termNo === 1) return '1st Year';
+            if ($termNo === 2) return '2nd Year';
+            if ($termNo === 3) return '3rd Year';
+            return "{$termNo}th Year";
+        }
+        return "Semester {$termNo}";
     }
 
     public function preview(Request $request)
@@ -38,7 +44,7 @@ class PromotionController extends Controller
             return response()->json(['message' => 'Program and session (batch) are required.'], 422);
         }
 
-        $program = Program::findOrFail($programId);
+        $program = Program::with('level')->findOrFail($programId);
         $session = AcademicSession::findOrFail($sessionId);
 
         $students = Student::with(['classSection', 'carryForwards' => fn($q) => $q->where('status', 'pending')->with('subject')])
@@ -119,7 +125,7 @@ class PromotionController extends Controller
             'promotions' => 'required|array'
         ]);
 
-        $program = Program::findOrFail($req['programId']);
+        $program = Program::with('level')->findOrFail($req['programId']);
         $finalTerm = $this->finalTermOf($program);
         $termNo = $req['termNo'];
         $isFinal = $termNo >= $finalTerm;

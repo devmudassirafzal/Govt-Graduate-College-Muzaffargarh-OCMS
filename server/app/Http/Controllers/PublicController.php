@@ -34,7 +34,7 @@ class PublicController extends Controller
             'id' => $p->id,
             'name' => $p->name,
             'code' => $p->code,
-            'level' => $p->level,
+            'level' => $p->level->name ?? '',
             'durationYears' => $p->duration_years,
             'totalSemesters' => $p->total_semesters,
             'seats' => $p->seats,
@@ -60,9 +60,9 @@ class PublicController extends Controller
         $sliders = Slider::where('is_active', true)->orderBy('sort_order', 'asc')->get();
         $notices = $this->publicNoticeQuery()->orderBy('published_at', 'desc')->take(5)->get();
         
-        $programs = Program::with(['department', 'interGroup', 'eligibilities.interGroup'])
+        $programs = Program::with(['department', 'interGroup', 'eligibilities.interGroup', 'level'])
             ->where('is_active', true)
-            ->orderBy('level', 'desc')
+            ->orderBy('program_level_id', 'desc')
             ->orderBy('name', 'asc')
             ->get();
 
@@ -192,7 +192,7 @@ class PublicController extends Controller
                 'teacherCount' => $d->teachers_count,
                 'studentCount' => $studentCount,
                 'programs' => $d->programs->map(fn($p) => [
-                    'id' => $p->id, 'name' => $p->name, 'code' => $p->code, 'level' => $p->level,
+                    'id' => $p->id, 'name' => $p->name, 'code' => $p->code, 'level' => $p->level->name ?? '',
                     'seats' => $p->seats, 'durationYears' => $p->duration_years, 'totalSemesters' => $p->total_semesters
                 ]),
                 'classes' => $classes->map(fn($c) => [
@@ -269,9 +269,9 @@ class PublicController extends Controller
 
     public function programs()
     {
-        $programs = Program::with(['department', 'interGroup', 'eligibilities.interGroup'])
+        $programs = Program::with(['department', 'interGroup', 'eligibilities.interGroup', 'level'])
             ->where('is_active', true)
-            ->orderBy('level', 'desc')
+            ->orderBy('program_level_id', 'desc')
             ->orderBy('name', 'asc')
             ->get();
             
@@ -280,22 +280,22 @@ class PublicController extends Controller
 
     public function admissions()
     {
-        $cycles = AdmissionCycle::with('academicSession')
+        $cycles = AdmissionCycle::with(['academicSession', 'level'])
             ->where('status', 'open')
-            ->orderBy('level', 'desc')
+            ->orderBy('program_level_id', 'desc')
             ->get();
             
-        $programs = Program::with(['department', 'interGroup', 'eligibilities.interGroup'])
+        $programs = Program::with(['department', 'interGroup', 'eligibilities.interGroup', 'level'])
             ->where('is_active', true)
             ->orderBy('name', 'asc')
             ->get();
 
         $formatted = $cycles->map(function($c) use ($programs) {
-            $filteredPrograms = $programs->filter(fn($p) => $p->level === $c->level);
+            $filteredPrograms = $programs->filter(fn($p) => $p->program_level_id === $c->program_level_id);
             return [
                 'id' => $c->id,
                 'title' => $c->title,
-                'level' => $c->level,
+                'level' => $c->level->name ?? '',
                 'session' => $c->academicSession->name ?? '',
                 'startAt' => $c->start_at,
                 'endAt' => $c->end_at,

@@ -36,7 +36,10 @@ class AdmissionController extends Controller
 
     private function documentTypesFor($app, $level)
     {
-        $types = DocumentType::where('is_active', true)->whereIn('applies_to', [$level, 'both'])->orderBy('id', 'asc')->get();
+        $types = DocumentType::where('is_active', true)
+            ->whereHas('programLevels', function($q) use ($level) {
+                $q->where('program_levels.id', $level->id);
+            })->orderBy('id', 'asc')->get();
         return $types->map(function ($t) use ($app) {
             if (str_starts_with($t->name, self::NOC_TYPE_NAME) && $this->needsNoc($app)) {
                 $t->is_required = true;
@@ -93,11 +96,11 @@ class AdmissionController extends Controller
         if (Carbon::now() > $cycle->end_at) return response()->json(['message' => 'The application deadline for this cycle has passed.'], 422);
         if (Carbon::now() < $cycle->start_at) return response()->json(['message' => 'This admission cycle has not started accepting applications yet.'], 422);
 
-        $program = Program::find($b['programId'] ?? 0);
-        if (!$program || $program->level !== $cycle->level) return response()->json(['message' => 'Selected program does not belong to this admission cycle.'], 422);
+        $program = Program::with('level')->find($b['programId'] ?? 0);
+        if (!$program || $program->program_level_id !== $cycle->program_level_id) return response()->json(['message' => 'Selected program does not belong to this admission cycle.'], 422);
 
         $required = ['name', 'fatherName', 'cnicBform', 'gender', 'dob', 'province', 'domicile', 'religion', 'address', 'phone', 'guardianPhone', 'matricBoard', 'matricYear', 'matricRollNo', 'matricObtained', 'matricTotal'];
-        if ($program->level === 'bs') {
+        if ($program->level->prerequisite_type === 'inter_groups') {
             array_push($required, 'interGroupId', 'interBoard', 'interYear', 'interRollNo', 'interObtained', 'interTotal');
         }
 
@@ -123,9 +126,9 @@ class AdmissionController extends Controller
 
         $dob = Carbon::parse($b['dob']);
         $age = $dob->diffInYears(Carbon::now());
-        $minAge = $cycle->level === 'bs' ? 16 : 15;
+        $minAge = $cycle->level->min_age ?? 15;
         if ($age < $minAge || $age > 45) {
-            return response()->json(['message' => "Applicant age must be between {$minAge} and 45 years for " . ($cycle->level === 'bs' ? 'BS' : 'Intermediate') . " admission."], 422);
+            return response()->json(['message' => "Applicant age must be between {$minAge} and 45 years for " . $cycle->level->name . " admission."], 422);
         }
 
         $thisYear = date('Y');
@@ -137,7 +140,7 @@ class AdmissionController extends Controller
         $marksOk = fn($o, $t) => $t > 0 && $o >= 0 && $o <= $t;
         if (!$marksOk($b['matricObtained'], $b['matricTotal'])) return response()->json(['message' => 'Matric marks are invalid.'], 422);
 
-        if ($program->level === 'bs') {
+        if ($program->level->prerequisite_type === 'inter_groups') {
             $interYear = (int)$b['interYear'];
             $earliestInterYear = max($dob->year + self::MIN_INTER_PASS_AGE, $matricYear + 1);
             if ($interYear < $earliestInterYear || $interYear > $thisYear) return response()->json(['message' => "Intermediate passing year must be between {$earliestInterYear} and {$thisYear}."], 422);

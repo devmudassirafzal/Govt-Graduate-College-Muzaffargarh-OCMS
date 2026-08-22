@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $id
  * @property int|null $department_id
  * @property int|null $inter_group_id
- * @property string $level
+ * @property int|null $program_level_id
  * @property string $name
  * @property string $code
  * @property int $duration_years
@@ -59,7 +59,7 @@ class Program extends Model
 	protected $fillable = [
 		'department_id',
 		'inter_group_id',
-		'level',
+		'program_level_id',
 		'name',
 		'code',
 		'duration_years',
@@ -68,6 +68,11 @@ class Program extends Model
 		'min_percentage',
 		'is_active'
 	];
+
+	public function level()
+	{
+		return $this->belongsTo(ProgramLevel::class, 'program_level_id');
+	}
 
 	public function department()
 	{
