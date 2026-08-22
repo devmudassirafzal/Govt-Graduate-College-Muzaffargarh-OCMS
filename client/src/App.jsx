@@ -111,7 +111,7 @@ export default function App() {
             <Route path="tasks" element={<PermissionRoute anyOf={['tasks.manage']}><Tasks /></PermissionRoute>} />
             <Route path="my-tasks" element={<MyTasks />} />
             {/* Admin / Principal only */}
-            <Route path="audit-logs" element={<PermissionRoute roles={['admin', 'principal']}><AuditLogs /></PermissionRoute>} />
+            <Route path="audit-logs" element={<PermissionRoute roles={['admin']}><AuditLogs /></PermissionRoute>} />
             {/* Access control (roles & permissions) is the Admin's domain — not the Principal. */}
             <Route path="permissions" element={<PermissionRoute roles={['admin']}><Permissions /></PermissionRoute>} />
             <Route path="departments" element={<PermissionRoute roles={['admin', 'principal']}><DepartmentsTeachers /></PermissionRoute>} />

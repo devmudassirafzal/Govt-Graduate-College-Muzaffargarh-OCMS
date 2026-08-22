@@ -16,11 +16,9 @@ const MENUS = {
     ['Permissions', '/portal/permissions'],
     ['Departments & Teachers', '/portal/departments'],
   ],
-  // Principal is the operational head but does not manage system access control —
-  // roles & permissions are the Admin's domain (no Permissions entry here).
+  // Principal is now a customizable role. They only get menus based on the permissions granted
+  // to them in the Admin portal, plus their personal tasks workspace.
   principal: [
-    ['Audit Logs', '/portal/audit-logs'],
-    ['Departments & Teachers', '/portal/departments'],
     ['My Tasks', '/portal/my-tasks'],
   ],
   clerk: [
