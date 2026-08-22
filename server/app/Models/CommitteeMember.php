@@ -34,6 +34,8 @@ class CommitteeMember extends Model
 	];
 
 	protected $fillable = [
+		'committee_id',
+		'teacher_id',
 		'position'
 	];
 

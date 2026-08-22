@@ -26,6 +26,8 @@ class UserHasPermission extends Model
 	protected $table = 'user_has_permissions';
 	public $incrementing = false;
 	public $timestamps = false;
+	
+	protected $fillable = ['user_id', 'permission_id'];
 
 	protected $casts = [
 		'user_id' => 'int',

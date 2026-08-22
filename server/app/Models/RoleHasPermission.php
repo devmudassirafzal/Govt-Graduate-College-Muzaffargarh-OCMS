@@ -26,6 +26,8 @@ class RoleHasPermission extends Model
 	protected $table = 'role_has_permissions';
 	public $incrementing = false;
 	public $timestamps = false;
+	
+	protected $fillable = ['role_id', 'permission_id'];
 
 	protected $casts = [
 		'role_id' => 'int',
