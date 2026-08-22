@@ -83,9 +83,25 @@ export default function AuditLogs() {
                 <div><dt className="inline text-slate-400">IP: </dt><dd className="inline font-mono text-xs">{l.ip ?? '—'}</dd></div>
               </dl>
               {l.summary && (
-                <pre className="mt-2 overflow-x-auto rounded border border-slate-200 bg-white p-3 text-xs text-slate-600">
-                  {JSON.stringify(l.summary, null, 2)}
-                </pre>
+                <div className="mt-2 rounded border border-slate-200 bg-white p-3 text-xs text-slate-600">
+                  <div className="mb-1 font-semibold text-slate-700">Payload / Changes:</div>
+                  <ul className="space-y-1">
+                    {Object.entries(l.summary).map(([k, v]) => (
+                      <li key={k}>
+                        <span className="font-medium text-slate-700 capitalize">
+                          {k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toLowerCase()}
+                        </span>
+                        :{' '}
+                        <span className="text-slate-600">
+                          {typeof v === 'object' ? JSON.stringify(v) : String(v)}
+                        </span>
+                      </li>
+                    ))}
+                    {Object.keys(l.summary).length === 0 && (
+                      <li className="italic text-slate-400">Empty payload</li>
+                    )}
+                  </ul>
+                </div>
               )}
             </div>
           ) : null}
