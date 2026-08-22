@@ -17,15 +17,18 @@ class AssessmentController extends Controller
 {
     public function index(Request $request)
     {
-        $teacher = Teacher::where('user_id', $request->user()->id)->firstOrFail();
-        
         $q = Assessment::with([
             'allocation.subject',
             'allocation.classSection.program.department'
         ])
         ->withCount('marks')
-        ->whereHas('allocation', fn($q) => $q->where('teacher_id', $teacher->id))
         ->orderBy('id', 'desc');
+
+        $isManager = $request->user()->hasPermission('marks.manage');
+        if (!$isManager) {
+            $teacher = Teacher::where('user_id', $request->user()->id)->firstOrFail();
+            $q->whereHas('allocation', fn($q) => $q->where('teacher_id', $teacher->id));
+        }
 
         if ($request->filled('allocation')) {
             $q->where('allocation_id', $request->allocation);
@@ -43,10 +46,13 @@ class AssessmentController extends Controller
             'totalMarks' => 'required|numeric'
         ]);
 
-        $teacher = Teacher::where('user_id', $request->user()->id)->firstOrFail();
         $alloc = Allocation::findOrFail($req['allocationId']);
+        $isManager = $request->user()->hasPermission('marks.manage');
         
-        if ($alloc->teacher_id !== $teacher->id) return response()->json(['message' => 'Not your class.'], 403);
+        if (!$isManager) {
+            $teacher = Teacher::where('user_id', $request->user()->id)->firstOrFail();
+            if ($alloc->teacher_id !== $teacher->id) return response()->json(['message' => 'Not your class.'], 403);
+        }
 
         $assessment = Assessment::create([
             'allocation_id' => $alloc->id,
@@ -61,10 +67,13 @@ class AssessmentController extends Controller
 
     public function destroy(Request $request, $id)
     {
-        $teacher = Teacher::where('user_id', $request->user()->id)->firstOrFail();
         $assessment = Assessment::with('allocation')->findOrFail($id);
+        $isManager = $request->user()->hasPermission('marks.manage');
         
-        if ($assessment->allocation->teacher_id !== $teacher->id) return response()->json(['message' => 'Not your assessment.'], 403);
+        if (!$isManager) {
+            $teacher = Teacher::where('user_id', $request->user()->id)->firstOrFail();
+            if ($assessment->allocation->teacher_id !== $teacher->id) return response()->json(['message' => 'Not your assessment.'], 403);
+        }
         if ($assessment->is_published) return response()->json(['message' => 'Published assessments cannot be deleted — students can already see these marks.'], 422);
 
         $assessment->delete();
@@ -73,14 +82,17 @@ class AssessmentController extends Controller
 
     public function getMarks(Request $request, $id)
     {
-        $teacher = Teacher::where('user_id', $request->user()->id)->firstOrFail();
         $assessment = Assessment::with([
             'allocation.subject',
             'allocation.classSection',
             'marks'
         ])->findOrFail($id);
+        $isManager = $request->user()->hasPermission('marks.manage');
         
-        if ($assessment->allocation->teacher_id !== $teacher->id) return response()->json(['message' => 'Not your assessment.'], 403);
+        if (!$isManager) {
+            $teacher = Teacher::where('user_id', $request->user()->id)->firstOrFail();
+            if ($assessment->allocation->teacher_id !== $teacher->id) return response()->json(['message' => 'Not your assessment.'], 403);
+        }
 
         $students = Student::where('class_section_id', $assessment->allocation->class_section_id)
             ->where('status', 'active')
@@ -109,10 +121,13 @@ class AssessmentController extends Controller
             'marks' => 'required|array'
         ]);
 
-        $teacher = Teacher::where('user_id', $request->user()->id)->firstOrFail();
         $assessment = Assessment::with('allocation')->findOrFail($id);
+        $isManager = $request->user()->hasPermission('marks.manage');
         
-        if ($assessment->allocation->teacher_id !== $teacher->id) return response()->json(['message' => 'Not your assessment.'], 403);
+        if (!$isManager) {
+            $teacher = Teacher::where('user_id', $request->user()->id)->firstOrFail();
+            if ($assessment->allocation->teacher_id !== $teacher->id) return response()->json(['message' => 'Not your assessment.'], 403);
+        }
 
         foreach ($req['marks'] as $m) {
             $obtained = isset($m['obtained']) && $m['obtained'] !== '' ? (float)$m['obtained'] : null;
@@ -136,10 +151,13 @@ class AssessmentController extends Controller
 
     public function publish(Request $request, $id)
     {
-        $teacher = Teacher::where('user_id', $request->user()->id)->firstOrFail();
         $assessment = Assessment::with('allocation.subject')->findOrFail($id);
+        $isManager = $request->user()->hasPermission('marks.manage');
         
-        if ($assessment->allocation->teacher_id !== $teacher->id) return response()->json(['message' => 'Not your assessment.'], 403);
+        if (!$isManager) {
+            $teacher = Teacher::where('user_id', $request->user()->id)->firstOrFail();
+            if ($assessment->allocation->teacher_id !== $teacher->id) return response()->json(['message' => 'Not your assessment.'], 403);
+        }
 
         $assessment->update(['is_published' => true]);
 

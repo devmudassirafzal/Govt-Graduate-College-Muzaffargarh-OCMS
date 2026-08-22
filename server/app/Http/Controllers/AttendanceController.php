@@ -28,20 +28,21 @@ class AttendanceController extends Controller
 
     public function getMyClasses(Request $request)
     {
-        $teacher = Teacher::where('user_id', $request->user()->id)->firstOrFail();
-        
-        $allocations = Allocation::with([
+        $q = Allocation::with([
             'subject',
             'classSection' => function($q) {
                 $q->withCount('students');
                 $q->with('program');
             }
-        ])
-        ->where('teacher_id', $teacher->id)
-        ->where('is_active', true)
-        ->get();
+        ])->where('is_active', true);
 
-        return response()->json(['allocations' => $allocations]);
+        if (!$request->user()->hasPermission('marks.manage')) {
+            $teacher = Teacher::where('user_id', $request->user()->id)->first();
+            if (!$teacher) return response()->json(['allocations' => []]);
+            $q->where('teacher_id', $teacher->id);
+        }
+
+        return response()->json(['allocations' => $q->get()]);
     }
 
     public function getSheet(Request $request)

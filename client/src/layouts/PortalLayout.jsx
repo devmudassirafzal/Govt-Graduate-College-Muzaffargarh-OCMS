@@ -81,6 +81,7 @@ const PERMISSION_MENU = [
   [['timetable.view', 'timetable.manage'], 'Time Slots', '/portal/slots'],
   [['committee.view', 'committee.manage'], 'Committees', '/portal/committees'],
   [['library.view', 'library.manage'], 'Library', '/portal/library-hub'],
+  [['marks.manage'], 'Student Marks Override', '/portal/assessments'],
   [['notices.view'], 'Notices', '/portal/notices'],
   [['website.view', 'website.manage'], 'Website Content', '/portal/website'],
   [['settings.view'], 'Settings', '/portal/settings'],
