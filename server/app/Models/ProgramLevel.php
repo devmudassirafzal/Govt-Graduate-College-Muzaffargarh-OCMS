@@ -12,6 +12,7 @@ class ProgramLevel extends Model
         'merit_rule',
         'prerequisite_type',
         'default_exam_system',
+        'cycle_years',
         'min_age',
         'is_active',
     ];
@@ -19,6 +20,7 @@ class ProgramLevel extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'min_age' => 'integer',
+        'cycle_years' => 'integer',
     ];
 
     public function programs()

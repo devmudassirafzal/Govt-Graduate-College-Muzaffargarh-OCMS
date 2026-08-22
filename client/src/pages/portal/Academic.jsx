@@ -87,7 +87,7 @@ export default function Academic() {
   // Dates are date-only: the cycle opens at 00:00 and closes at 23:59 local.
   const localDateStr = (dt) => dt.toLocaleDateString('en-CA'); // YYYY-MM-DD in local time
   const selectedCycleLevel = (d.programLevels ?? []).find((l) => String(l.id) === String(form.programLevelId));
-  const cycleSpan = selectedCycleLevel?.defaultExamSystem === 'annual' ? 2 : 4;
+  const cycleSpan = selectedCycleLevel?.cycleYears ?? 4;
   const parseSessionText = (text) => {
     const m = /^\s*(\d{4})\s*[-–]\s*(\d{4})\s*$/.exec(text ?? '');
     return m ? { startYear: Number(m[1]), endYear: Number(m[2]) } : null;
@@ -104,7 +104,7 @@ export default function Academic() {
   const onCycleLevel = (e) => {
     const levelId = e.target.value;
     const lvl = (d.programLevels ?? []).find((l) => String(l.id) === String(levelId));
-    const span = lvl?.defaultExamSystem === 'annual' ? 2 : 4;
+    const span = lvl?.cycleYears ?? 4;
     // Level switch re-derives the end year from the same start year.
     const years = parseSessionText(form.sessionName);
     const sessionName = years ? `${years.startYear}-${years.startYear + span}` : form.sessionName;
@@ -389,6 +389,7 @@ export default function Academic() {
           <p className="mb-3 text-sm text-slate-500">Define admissible program levels (e.g. BS, Intermediate, Diploma). These are used throughout the system for programs, admission cycles, and document types.</p>
           <Table columns={[
             { header: 'Name', cell: (x) => <span className="font-semibold text-primary">{x.name}</span> },
+            { header: 'Duration', cell: (x) => `${x.cycleYears ?? '?'} yr` },
             { header: 'Merit Rule', cell: (x) => <Badge value={x.meritRule ?? 'combined'} /> },
             { header: 'Prerequisite', cell: (x) => <Badge value={x.prerequisiteType} /> },
             { header: 'Exam System', cell: (x) => <Badge value={x.defaultExamSystem} /> },
@@ -463,6 +464,9 @@ export default function Academic() {
               <option value="semester">Semester System</option>
               <option value="annual">Annual System (Year-based)</option>
             </Select>
+          </Field>
+          <Field label="Cycle Duration (Years)" hint="How many years a session for this level runs (e.g. BS=4, Intermediate=2, DIT=2).">
+            <Input type="number" min="1" max="10" value={form.cycleYears ?? ''} onChange={set('cycleYears')} />
           </Field>
           <Field label="Minimum Age" hint="Minimum applicant age (leave blank for no limit)."><Input type="number" value={form.minAge ?? ''} onChange={set('minAge')} /></Field>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.isActive ?? true} onChange={set('isActive')} /> Active</label>
@@ -716,7 +720,7 @@ export default function Academic() {
             <Select value={form.programLevelId ?? ''} onChange={onCycleLevel} disabled={!!editItem}>
               <option value="">Select…</option>
               {(d.programLevels ?? []).filter(l => l.isActive).map((l) => (
-                <option key={l.id} value={l.id}>{l.name} ({l.defaultExamSystem === 'annual' ? '2-year annual' : '4-year semester'})</option>
+                <option key={l.id} value={l.id}>{l.name} ({l.cycleYears ?? (l.defaultExamSystem === 'annual' ? 2 : 4)}-year {l.defaultExamSystem})</option>
               ))}
             </Select>
           </Field>
