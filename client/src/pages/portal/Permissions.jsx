@@ -23,7 +23,7 @@ const GROUP_LABEL = {
 // What identity roles do by design (not grantable module permissions).
 const ROLE_NOTES = {
   admin: 'Full system control — passes every permission check, manages this page.',
-  principal: 'Super admin — passes every permission check, manages this page.',
+  principal: 'Oversees academic activities. Granted full module permissions by default, but these can be revoked.',
   hod: 'Granted automatically with a HOD nomination: own department page, gallery, students.',
   teacher: 'Own classes: attendance, assessments & marks, classwork, timetable, profile.',
   student: 'Own records: attendance, marks, classwork, challans, library, student card.',
@@ -209,7 +209,7 @@ export default function Permissions() {
         <h1 className="text-2xl font-bold text-slate-900">Permissions</h1>
         <p className="text-sm text-slate-500">
           Tick a box to allow a role to do something; untick to take it away. Changes apply on the role&apos;s next request —
-          no re-login needed. <span className="font-medium text-slate-600">Admin and Principal always have full access.</span>
+          no re-login needed. <span className="font-medium text-slate-600">Admin always has full access.</span>
         </p>
       </div>
 
@@ -273,7 +273,7 @@ export default function Permissions() {
           <div key={role} className="rounded-lg border border-slate-200 bg-white px-4 py-3">
             <div className="text-sm font-semibold capitalize text-slate-800">
               {role}
-              {['admin', 'principal'].includes(role) && (
+              {role === 'admin' && (
                 <span className="ml-2 rounded bg-green-50 px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-green-200">full access</span>
               )}
             </div>
@@ -463,7 +463,6 @@ function PermissionGroup({ group, perms, role, saving, onToggle, onToggleGroup }
 function GrantPreview({ matrix, roleName }) {
   const role = matrix?.roles?.find((r) => r.name === roleName);
   if (!role) return null;
-  if (roleName === 'principal') return <p>Full access to every module, the audit trail, and this Permissions page.</p>;
   if (roleName === 'admin') return <p>Reads every module and manages access control — roles, permissions, HOD nominations, and user accounts. Does not create operational content (timetables, notices, academic records, library, etc.); that belongs to the relevant staff role.</p>;
   if (role.superAdmin) return <p>Full access to every module, the audit trail, and this Permissions page.</p>;
   if (ROLE_NOTES[roleName] && !role.grantable) return <p>{ROLE_NOTES[roleName]}</p>;

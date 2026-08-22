@@ -20,7 +20,7 @@ use App\Services\HodService;
 
 class AdminController extends Controller
 {
-    private const SUPER_ROLES = ['admin', 'principal'];
+    private const SUPER_ROLES = ['admin'];
     private const GRANTABLE_HINT = ['clerk', 'librarian', 'timetable', 'teacher', 'hod', 'student'];
     private const ROLE_DEFAULTS = [
         'admin' => ['*'],

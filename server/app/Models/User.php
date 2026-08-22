@@ -97,7 +97,7 @@ class User extends Authenticatable
 
 	public function hasPermission($permissionName)
 	{
-		if ($this->hasRole('admin') || $this->hasRole('principal')) {
+		if ($this->hasRole('admin')) {
 			return true;
 		}
 

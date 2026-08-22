@@ -23,7 +23,7 @@ class AppServiceProvider extends ServiceProvider
             $user->loadMissing('roles.permissions', 'permissions');
             $roles = $user->roles->pluck('name')->toArray();
             
-            if (in_array('admin', $roles) || in_array('principal', $roles)) {
+            if (in_array('admin', $roles)) {
                 return true;
             }
 
