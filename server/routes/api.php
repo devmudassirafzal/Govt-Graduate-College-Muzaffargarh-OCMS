@@ -88,6 +88,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/users/{id}/permissions', [\App\Http\Controllers\AdminController::class, 'getUserPermissions']);
         Route::post('/users/{id}/permissions', [\App\Http\Controllers\AdminController::class, 'grantUserPermission']);
         Route::delete('/users/{id}/permissions/{permission}', [\App\Http\Controllers\AdminController::class, 'revokeUserPermission']);
+        Route::post('/users/bulk-permissions', [\App\Http\Controllers\AdminController::class, 'bulkUserPermission']);
         
         Route::post('/users/{id}/roles', [\App\Http\Controllers\AdminController::class, 'grantUserRole']);
         Route::delete('/users/{id}/roles/{role}', [\App\Http\Controllers\AdminController::class, 'revokeUserRole']);

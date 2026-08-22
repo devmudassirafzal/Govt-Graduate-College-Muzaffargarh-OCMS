@@ -271,7 +271,36 @@ class AdminController extends Controller
         $p = Permission::where('name', $permissionName)->firstOrFail();
 
         UserHasPermission::where('user_id', $user->id)->where('permission_id', $p->id)->delete();
-        return response()->json(['message' => "Direct permission removed."]);
+        return response()->json(['message' => "{$user->name} can no longer {$p->label}."]);
+    }
+
+    public function bulkUserPermission(Request $request)
+    {
+        $this->adminOnly($request);
+        $request->validate([
+            'userIds' => 'required|array',
+            'userIds.*' => 'integer',
+            'permission' => 'required|string',
+            'action' => 'required|in:grant,revoke'
+        ]);
+
+        $p = Permission::where('name', $request->permission)->firstOrFail();
+        
+        if ($request->action === 'grant') {
+            foreach ($request->userIds as $uid) {
+                // Prevent self-modification
+                if ($uid != $request->user()->id) {
+                    UserHasPermission::updateOrCreate(['user_id' => $uid, 'permission_id' => $p->id]);
+                }
+            }
+            return response()->json(['message' => "Granted '{$p->label}' to selected users."]);
+        } else {
+            UserHasPermission::whereIn('user_id', $request->userIds)
+                ->where('permission_id', $p->id)
+                ->where('user_id', '!=', $request->user()->id)
+                ->delete();
+            return response()->json(['message' => "Revoked '{$p->label}' from selected users."]);
+        }
     }
 
     // ── User Roles ──
