@@ -91,7 +91,11 @@ export default function Assessments() {
                   <Button variant="outline" onClick={() => openGrid(a)}>Marks</Button>
                   <Button variant="outline" onClick={() => printPaper({
                     title: a.title,
-                    typeLabel: a.type === 'midterm' ? 'Mid Term Examination' : a.type === 'sessional' ? 'Sessional Test' : a.title,
+                    typeLabel: a.type === 'midterm' ? 'Mid Term Examination' 
+                             : a.type === 'sessional' ? 'Sessional Test' 
+                             : a.type === 'final' ? 'Final Examination' 
+                             : a.type === 'practical' ? 'Practical (Lab)' 
+                             : a.title,
                     allocation: a.allocation,
                     date: a.heldOn,
                     totalMarks: a.totalMarks,
@@ -124,7 +128,11 @@ export default function Assessments() {
           </Field>
           <Field label="Type">
             <Select value={form.type} onChange={set('type')}>
-              <option value="midterm">Midterm</option><option value="sessional">Sessional</option><option value="other">Other</option>
+              <option value="midterm">Midterm</option>
+              <option value="sessional">Sessional</option>
+              <option value="final">Final Exam</option>
+              <option value="practical">Practical (Lab)</option>
+              <option value="other">Other</option>
             </Select>
           </Field>
           <Field label="Title"><Input value={form.title ?? ''} onChange={set('title')} /></Field>

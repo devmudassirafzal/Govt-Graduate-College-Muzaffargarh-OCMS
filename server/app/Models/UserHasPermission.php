@@ -27,11 +27,12 @@ class UserHasPermission extends Model
 	public $incrementing = false;
 	public $timestamps = false;
 	
-	protected $fillable = ['user_id', 'permission_id'];
+	protected $fillable = ['user_id', 'permission_id', 'expires_at'];
 
 	protected $casts = [
 		'user_id' => 'int',
-		'permission_id' => 'int'
+		'permission_id' => 'int',
+		'expires_at' => 'datetime'
 	];
 
 	public function permission()

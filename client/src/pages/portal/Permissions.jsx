@@ -75,6 +75,7 @@ function PermissionsMatrix({ matrix, loadMatrix, flash, confirm }) {
   
   const [permQ, setPermQ] = useState('');
   const [userQ, setUserQ] = useState('');
+  const [expiresAt, setExpiresAt] = useState('');
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -147,7 +148,13 @@ function PermissionsMatrix({ matrix, loadMatrix, flash, confirm }) {
       } else {
         const userIds = Array.from(selectedUsers);
         const action = has ? 'revoke' : 'grant';
-        const r = await api.post('/admin/users/bulk-permissions', { userIds, permission: perm.name, action });
+        const payload = {
+          userIds,
+          permission: perm.name,
+          action,
+          expiresAt: expiresAt || null
+        };
+        const r = await api.post('/admin/users/bulk-permissions', payload);
         flash({ type: 'ok', text: r.data.message });
         
         // Update local map
@@ -245,7 +252,12 @@ function PermissionsMatrix({ matrix, loadMatrix, flash, confirm }) {
             {applyToAll ? (
               <span>Changes apply to <b>ALL current and future</b> users with the {role?.name} role.</span>
             ) : (
-              <span>Changes apply <b>directly</b> to the {selectedUsers.size} selected users.</span>
+              <div className="flex flex-col gap-2">
+                <span>Changes apply <b>directly</b> to the {selectedUsers.size} selected users.</span>
+                <Field label="Expiration Date & Time (Optional)">
+                  <Input type="datetime-local" value={expiresAt} onChange={(e) => setExpiresAt(e.target.value)} />
+                </Field>
+              </div>
             )}
           </div>
         </div>

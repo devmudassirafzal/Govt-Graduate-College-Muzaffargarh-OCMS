@@ -106,9 +106,19 @@ function menuFor(user) {
     if (!roles.includes(role)) continue;
     for (const [label, to] of MENUS[role]) push(label, to);
   }
+  
+  const isTemporary = (needs) => {
+    if (user.roles.includes('admin') || user.roles.includes('principal')) return false; // Full permanent access
+    const permanent = needs.some(p => user.permissions.includes(p) && !(user.temporaryPermissions || []).includes(p));
+    if (permanent) return false;
+    return needs.some(p => (user.temporaryPermissions || []).includes(p));
+  };
+
   // Whatever the Admin/Principal granted this user's roles shows up as a menu item.
   for (const [needs, label, to] of PERMISSION_MENU) {
-    if (has(needs)) push(label, to);
+    if (has(needs)) {
+      push(isTemporary(needs) ? `${label} *` : label, to);
+    }
   }
   // Every role manages its own credentials (§5.13).
   push('My Account', '/portal/account');

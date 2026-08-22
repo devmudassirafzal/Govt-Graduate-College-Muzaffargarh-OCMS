@@ -87,7 +87,7 @@ class User extends Authenticatable
 
 	public function permissions()
 	{
-		return $this->belongsToMany(Permission::class, 'user_has_permissions');
+		return $this->belongsToMany(Permission::class, 'user_has_permissions')->withPivot('expires_at');
 	}
 
 	public function roles()
@@ -101,8 +101,11 @@ class User extends Authenticatable
 			return true;
 		}
 
-		if ($this->permissions->contains('name', $permissionName)) {
-			return true;
+		$userPerm = $this->permissions->firstWhere('name', $permissionName);
+		if ($userPerm) {
+			if (!$userPerm->pivot->expires_at || \Carbon\Carbon::parse($userPerm->pivot->expires_at)->isFuture()) {
+				return true;
+			}
 		}
 		
 		foreach ($this->roles as $role) {

@@ -257,8 +257,20 @@ class AdminController extends Controller
         
         $user = User::findOrFail($id);
         $p = Permission::where('name', $request->permission)->firstOrFail();
+        $expires = $request->expiresAt ? \Carbon\Carbon::parse($request->expiresAt) : null;
 
-        UserHasPermission::updateOrCreate(['user_id' => $user->id, 'permission_id' => $p->id]);
+        UserHasPermission::updateOrCreate(
+            ['user_id' => $user->id, 'permission_id' => $p->id],
+            ['expires_at' => $expires]
+        );
+        
+        \App\Models\Notification::create([
+            'user_id' => $user->id,
+            'type' => 'permission',
+            'title' => 'Permission Granted',
+            'body' => "You have been granted '{$p->label}'" . ($expires ? " until " . $expires->format('d M Y h:i A') . "." : "."),
+        ]);
+        
         return response()->json(['message' => "{$user->name} can now {$p->label}."]);
     }
 
@@ -281,16 +293,27 @@ class AdminController extends Controller
             'userIds' => 'required|array',
             'userIds.*' => 'integer',
             'permission' => 'required|string',
-            'action' => 'required|in:grant,revoke'
+            'action' => 'required|in:grant,revoke',
+            'expiresAt' => 'nullable|date'
         ]);
 
         $p = Permission::where('name', $request->permission)->firstOrFail();
         
         if ($request->action === 'grant') {
+            $expires = $request->expiresAt ? \Carbon\Carbon::parse($request->expiresAt) : null;
             foreach ($request->userIds as $uid) {
                 // Prevent self-modification
                 if ($uid != $request->user()->id) {
-                    UserHasPermission::updateOrCreate(['user_id' => $uid, 'permission_id' => $p->id]);
+                    UserHasPermission::updateOrCreate(
+                        ['user_id' => $uid, 'permission_id' => $p->id],
+                        ['expires_at' => $expires]
+                    );
+                    \App\Models\Notification::create([
+                        'user_id' => $uid,
+                        'type' => 'permission',
+                        'title' => 'Permission Granted',
+                        'body' => "You have been granted '{$p->label}'" . ($expires ? " until " . $expires->format('d M Y h:i A') . "." : "."),
+                    ]);
                 }
             }
             return response()->json(['message' => "Granted '{$p->label}' to selected users."]);

@@ -50,8 +50,16 @@ class AuthController extends Controller
             return $r->permissions->pluck('name');
         })->toArray();
         
-        $directPermissions = $user->permissions->pluck('name')->toArray();
+        $activeDirect = $user->permissions->filter(function($p) {
+            return !$p->pivot->expires_at || \Carbon\Carbon::parse($p->pivot->expires_at)->isFuture();
+        });
+
+        $directPermissions = $activeDirect->pluck('name')->toArray();
         $allPermissions = array_values(array_unique(array_merge($rolePermissions, $directPermissions)));
+
+        $temporaryPermissions = $activeDirect->filter(function($p) {
+            return $p->pivot->expires_at != null;
+        })->pluck('name')->toArray();
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -63,7 +71,8 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'mustChangePassword' => $user->must_change_password,
                 'roles' => $userRoles,
-                'permissions' => $allPermissions
+                'permissions' => $allPermissions,
+                'temporaryPermissions' => $temporaryPermissions
             ]
         ]);
     }
@@ -78,8 +87,16 @@ class AuthController extends Controller
             return $r->permissions->pluck('name');
         })->toArray();
         
-        $directPermissions = $user->permissions->pluck('name')->toArray();
+        $activeDirect = $user->permissions->filter(function($p) {
+            return !$p->pivot->expires_at || \Carbon\Carbon::parse($p->pivot->expires_at)->isFuture();
+        });
+
+        $directPermissions = $activeDirect->pluck('name')->toArray();
         $allPermissions = array_values(array_unique(array_merge($rolePermissions, $directPermissions)));
+
+        $temporaryPermissions = $activeDirect->filter(function($p) {
+            return $p->pivot->expires_at != null;
+        })->pluck('name')->toArray();
 
         return response()->json([
             'user' => [
@@ -88,7 +105,8 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'mustChangePassword' => $user->must_change_password,
                 'roles' => $userRoles,
-                'permissions' => $allPermissions
+                'permissions' => $allPermissions,
+                'temporaryPermissions' => $temporaryPermissions
             ]
         ]);
     }

@@ -163,9 +163,12 @@ class AssessmentController extends Controller
             ->get();
 
         $formatted = $marks->map(function($m) {
+            $subj = $m->assessment->allocation->subject;
             return [
                 'id' => $m->id,
-                'subject' => $m->assessment->allocation->subject->title ?? '',
+                'subjectId' => $subj->id ?? null,
+                'subject' => $subj->title ?? '',
+                'creditHours' => $subj->credit_hours ?? 3,
                 'title' => $m->assessment->title,
                 'type' => $m->assessment->type,
                 'obtained' => $m->obtained,
