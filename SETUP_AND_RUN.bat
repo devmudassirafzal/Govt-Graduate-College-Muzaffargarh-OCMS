@@ -214,7 +214,41 @@ OK 'Backend dependencies installed'
 
 # -- 5. Database migrations + default data ------------------------------------
 Step 5 'Setting up the database'
-Info 'Applying migrations...'
+
+# Check if database is populated. If not, import the dump first.
+$dbName = 'ggcm_ocms_v2'
+$sqlDump = Join-Path $Root 'ggcm_ocms_v2_data.sql'
+$isDbEmpty = $true
+
+if (Test-MySqlServing) {
+  # Get first working mysql exe
+  $mysqlExe = $null
+  foreach ($exe in $mysqlCandidates) {
+    if ((& $exe -u root -N -e 'SELECT 1;' 2>&1) -match '^\s*1\s*$') { $mysqlExe = $exe; break }
+  }
+  if (-not $mysqlExe) { $mysqlExe = 'mysql' }
+
+  # Check if users table exists
+  $tableExists = & $mysqlExe -u root -N -e "SELECT count(*) FROM information_schema.tables WHERE table_schema='$dbName' AND table_name='users';" 2>&1
+  if ($tableExists -match '^\s*1\s*$') {
+    $isDbEmpty = $false
+  }
+  
+  if ($isDbEmpty) {
+    Info "Fresh install detected. Creating database and importing $sqlDump (this may take a moment)..."
+    & $mysqlExe -u root -e "DROP DATABASE IF EXISTS $dbName; CREATE DATABASE $dbName CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+    if (Test-Path $sqlDump) {
+      cmd /c "`"$mysqlExe`" -u root $dbName < `"$sqlDump`""
+      OK 'Database restored from dump successfully.'
+    } else {
+      Warn "Dump file $sqlDump not found! Creating empty schema instead."
+    }
+  } else {
+    OK "Database already populated. Skipping full dump import."
+  }
+}
+
+Info 'Applying migrations to ensure schema is up to date...'
 Run-In $Server php @('artisan', 'migrate', '--force') 'Laravel migration'
 OK 'Database schema is up to date'
 
