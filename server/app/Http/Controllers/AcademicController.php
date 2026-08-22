@@ -321,7 +321,7 @@ class AcademicController extends Controller
         if (!$level) return response()->json(['message' => 'Select a valid program level.'], 422);
         if (!$request->academicSessionId && !$request->sessionName) return response()->json(['message' => 'Enter the session years.'], 422);
         
-        $need = $level->default_exam_system === 'annual' ? 2 : 4;
+        $need = $level->cycle_years ?? ($level->default_exam_system === 'annual' ? 2 : 4);
         $levelName = $level->name;
 
         $session = null;
