@@ -10,6 +10,35 @@ use Illuminate\Support\Facades\RateLimiter;
 
 class AuthController extends Controller
 {
+    public function register(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'cnic' => 'required|string|regex:/^[0-9]{5}-[0-9]{7}-[0-9]$/|unique:users,cnic',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'cnic' => $request->cnic,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'must_change_password' => false,
+            'is_active' => true,
+        ]);
+
+        $applicantRole = \App\Models\Role::where('name', 'applicant')->first();
+        if ($applicantRole) {
+            \App\Models\UserRole::create([
+                'user_id' => $user->id,
+                'role_id' => $applicantRole->id,
+            ]);
+        }
+
+        return response()->json(['message' => 'Account created successfully'], 201);
+    }
+
     public function login(Request $request)
     {
         $request->validate([
