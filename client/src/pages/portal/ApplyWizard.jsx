@@ -111,9 +111,9 @@ export default function ApplyWizard() {
   if (!meta) return <div className="py-20 text-center text-slate-400">Loading…</div>;
 
   const cycle = meta.cycles.find((c) => c.id === Number(form.cycleId));
-  const programs = meta.programs.filter((p) => p.level === cycle?.level);
+  const programs = meta.programs.filter((p) => p.programLevelId === cycle?.programLevelId);
   const program = programs.find((p) => p.id === Number(form.programId));
-  const isBs = cycle?.level === 'bs';
+  const isBs = cycle?.programLevelId === 1;
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value });
 
   // ── Real admission validations, mirrored by the server (§6.1/§6.2)
