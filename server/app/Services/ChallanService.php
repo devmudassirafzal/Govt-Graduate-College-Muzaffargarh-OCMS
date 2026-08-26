@@ -120,7 +120,7 @@ class ChallanService
     {
         $pattern = SettingService::getSetting('rollno.pattern', '{YEAR}-{COLLEGE}-{DEPT}-{SEQ3}');
         $collegeCode = SettingService::getSetting('site.college_code', 'GGCM');
-        $deptCode = $program->department ? $program->department->code : 'GEN';
+        $deptCode = $program->department ? $program->department->code : $program->code;
         $count = Student::where('program_id', $program->id)->where('academic_session_id', $session->id)->count();
         $seq = $count + 1;
 
@@ -231,15 +231,16 @@ class ChallanService
             
             $seqs = [];
             foreach ($students as $s) {
-                $key = "{$s->program_id}|{$s->academic_session_id}";
-                if (!isset($seqs[$key])) $seqs[$key] = 0;
-                $seqs[$key]++;
-                
                 $year = $sessions[$s->academic_session_id]->start_year ?? '';
-                $deptCode = $s->program->department->code ?? 'GEN';
+                $deptCode = $s->program->department->code ?? $s->program->code;
+                
+                $prefixKey = "{$year}-{$deptCode}";
+                if (!isset($seqs[$prefixKey])) $seqs[$prefixKey] = 0;
+                $seqs[$prefixKey]++;
+                
                 $roll = str_replace(
                     ['{YEAR}', '{PROG}', '{COLLEGE}', '{DEPT}', '{SEQ3}'],
-                    [$year, $s->program->code, $collegeCode, $deptCode, str_pad($seqs[$key], 3, '0', STR_PAD_LEFT)],
+                    [$year, $s->program->code, $collegeCode, $deptCode, str_pad($seqs[$prefixKey], 3, '0', STR_PAD_LEFT)],
                     $pattern
                 );
                 $s->update(['roll_number' => $roll]);
