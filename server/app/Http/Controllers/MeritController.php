@@ -71,7 +71,9 @@ class MeritController extends Controller
             }])->find($list->id);
             return response()->json(['meritList' => $full], 201);
         } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], $e->getCode() ?: 422);
+            $code = $e->getCode();
+            $status = (is_numeric($code) && (int)$code >= 100 && (int)$code <= 599) ? (int)$code : 422;
+            return response()->json(['message' => $e->getMessage()], $status);
         }
     }
 
