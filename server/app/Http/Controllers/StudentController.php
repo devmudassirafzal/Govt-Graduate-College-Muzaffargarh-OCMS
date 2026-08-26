@@ -146,11 +146,13 @@ class StudentController extends Controller
 
         $section = ClassSection::withCount('students')->find($request->classSectionId);
         if (!$section) return response()->json(['message' => 'Class shift not found.'], 404);
-        if ($section->capacity && $section->students_count >= $section->capacity) {
+        
+        $student = Student::findOrFail($id);
+
+        if ($section->capacity && $section->students_count >= $section->capacity && $student->class_section_id !== $section->id) {
             return response()->json(['message' => "{$section->shift} class shift is full ({$section->capacity})."], 422);
         }
 
-        $student = Student::findOrFail($id);
         $student->update(['class_section_id' => $section->id]);
 
         return response()->json(['student' => $student]);
