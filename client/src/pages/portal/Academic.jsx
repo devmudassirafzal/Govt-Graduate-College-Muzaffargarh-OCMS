@@ -3,7 +3,7 @@ import api from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Table, Badge, Button, Input, Select, Modal, Field, Textarea, useFlash, errText, fmtDate } from '../../components/ui';
 
-const TABS = ['Program Levels', 'Departments', 'Programs', 'Subjects', 'Class Shifts', 'Allocations', 'Sessions', 'Cycles', 'Designations', 'Inter-Groups', 'Document Types'];
+const TABS = ['Program Levels', 'Departments', 'Programs', 'Subjects', 'Class Shifts', 'Allocations', 'Sessions', 'Cycles', 'Designations', 'Matric-Groups', 'Inter-Groups', 'Document Types'];
 
 export default function Academic() {
   const { user, can } = useAuth();
@@ -374,6 +374,17 @@ export default function Academic() {
             { header: 'Title', cell: (x) => <span className="font-semibold">{x.title}</span> },
             { header: 'Actions', cell: (x) => <RowActions onEdit={() => openEdit('designation', x)} deleteUrl={`/academic/designations/${x.id}`} label="Designation" /> },
           ]} rows={d.designations} empty="No designations yet — add e.g. Professor, Associate Professor, Lecturer. Needed before you can add teachers." />
+        </Card>
+      )}
+
+      {/* ── Matric-Groups ─────────────────────────────────────────── */}
+      {tab === 'Matric-Groups' && (
+        <Card title="Matriculation Groups" actions={canManage && <Button onClick={() => openCreate('matricGroup', {})}>+ Add</Button>}>
+          <Table columns={[
+            { header: 'Code', cell: (x) => <span className="font-semibold text-primary">{x.code}</span> },
+            { header: 'Name', cell: (x) => x.name },
+            { header: 'Actions', cell: (x) => <RowActions onEdit={() => openEdit('matricGroup', x)} deleteUrl={`/academic/matric-groups/${x.id}`} label="Matriculation group" /> },
+          ]} rows={d.matricGroups} empty="No matriculation groups yet — add e.g. Science, Arts, Computer Science." />
         </Card>
       )}
 
@@ -799,6 +810,20 @@ export default function Academic() {
             <Button variant="outline" onClick={() => setModal(null)}>Cancel</Button>
             <Button onClick={() => submit('/academic/designations', `/academic/designations/${editItem?.id}`, form, 'Designation')}>
               {editItem ? 'Save Changes' : 'Add Designation'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* ────── Matric-group modal ────── */}
+      <Modal open={modal === 'matricGroup'} title={editItem ? 'Edit Matriculation Group' : 'Add Matriculation Group'} onClose={() => setModal(null)}>
+        <div className="space-y-3">
+          <Field label="Name (e.g. Science)"><Input value={form.name ?? ''} onChange={set('name')} /></Field>
+          <Field label="Code (e.g. SCI)"><Input value={form.code ?? ''} onChange={set('code')} /></Field>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setModal(null)}>Cancel</Button>
+            <Button onClick={() => submit('/academic/matric-groups', `/academic/matric-groups/${editItem?.id}`, form, 'Matriculation group')}>
+              {editItem ? 'Save Changes' : 'Add Group'}
             </Button>
           </div>
         </div>

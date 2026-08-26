@@ -169,6 +169,30 @@ class AcademicController extends Controller
         return response()->json(['matricGroups' => MatricGroup::orderBy('name', 'asc')->get()]);
     }
 
+    public function storeMatricGroup(Request $request)
+    {
+        Gate::authorize('academic.manage');
+        $request->validate(['name' => 'required', 'code' => 'required']);
+        $mg = MatricGroup::create(['name' => $request->name, 'code' => $request->code]);
+        return response()->json(['matricGroup' => $mg], 201);
+    }
+
+    public function updateMatricGroup(Request $request, $id)
+    {
+        Gate::authorize('academic.manage');
+        $request->validate(['name' => 'required', 'code' => 'required']);
+        $mg = MatricGroup::findOrFail($id);
+        $mg->update(['name' => $request->name, 'code' => $request->code]);
+        return response()->json(['matricGroup' => $mg]);
+    }
+
+    public function deleteMatricGroup($id)
+    {
+        Gate::authorize('academic.manage');
+        MatricGroup::findOrFail($id)->delete();
+        return response()->json(['message' => 'Matriculation group deleted.']);
+    }
+
     public function storeInterGroup(Request $request)
     {
         Gate::authorize('academic.manage');

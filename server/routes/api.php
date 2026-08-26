@@ -30,6 +30,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/designations/{id}', [AcademicController::class, 'deleteDesignation']);
 
         Route::get('/matric-groups', [AcademicController::class, 'getMatricGroups']);
+        Route::post('/matric-groups', [AcademicController::class, 'storeMatricGroup']);
+        Route::put('/matric-groups/{id}', [AcademicController::class, 'updateMatricGroup']);
+        Route::delete('/matric-groups/{id}', [AcademicController::class, 'deleteMatricGroup']);
         Route::get('/inter-groups', [AcademicController::class, 'getInterGroups']);
         Route::post('/inter-groups', [AcademicController::class, 'storeInterGroup']);
         Route::put('/inter-groups/{id}', [AcademicController::class, 'updateInterGroup']);
