@@ -194,7 +194,9 @@ export default function Students() {
                 <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                   <Button variant="outline" onClick={() => setViewStudent(s)}>View</Button>
                   {can('students.update') && (
-                    <Button onClick={() => { setAssign(s); setSectionId(s.classSectionId ?? ''); }}>Assign Shift</Button>
+                    <Button onClick={() => { setAssign(s); setSectionId(s.classSectionId ?? ''); }}>
+                      {s.classSection ? 'Change Shift' : 'Assign Shift'}
+                    </Button>
                   )}
                 </div>
               )
