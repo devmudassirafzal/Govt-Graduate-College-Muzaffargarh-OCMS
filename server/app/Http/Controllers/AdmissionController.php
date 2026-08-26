@@ -160,7 +160,7 @@ class AdmissionController extends Controller
         $data = [
             'user_id' => $request->user()->id, 'admission_cycle_id' => $cycle->id, 'program_id' => $program->id,
             'name' => $b['name'], 'father_name' => $b['fatherName'], 'cnic_bform' => $b['cnicBform'], 'gender' => $b['gender'],
-            'dob' => $dob, 'province' => $b['province'], 'domicile' => $b['domicile'], 'address' => $b['address'],
+            'dob' => $dob, 'province' => $b['province'], 'domicile_district' => $b['domicile'], 'address' => $b['address'],
             'phone' => $b['phone'], 'guardian_phone' => $b['guardianPhone'], 'religion' => $b['religion'],
             'marital_status' => $b['maritalStatus'] ?? null, 'blood_group' => $b['bloodGroup'] ?? null,
             'has_disability' => !empty($b['hasDisability']), 'disability_details' => !empty($b['hasDisability']) ? ($b['disabilityDetails'] ?? null) : null,
