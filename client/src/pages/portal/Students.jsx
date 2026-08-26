@@ -133,8 +133,8 @@ export default function Students() {
           const lvl = programLevels.find(l => l.id === Number(form.programLevelId));
           if (!lvl) return null;
           
-          if (lvl.prerequisiteType === 'matric_groups' || lvl.prerequisiteType === 'inter_groups') {
-            const groups = lvl.prerequisiteType === 'inter_groups' ? interGroups : matricGroups;
+          if (lvl.name === 'Intermediate' || lvl.name === 'Diploma') {
+            const groups = lvl.name === 'Intermediate' ? interGroups : matricGroups;
             return (
               <Field label="Group / Specialization">
                 <Select value={form.groupId} onChange={setF('groupId')}>
@@ -150,6 +150,7 @@ export default function Students() {
                   <option value="">All Shifts</option>
                   <option value="morning">Morning</option>
                   <option value="evening">Evening</option>
+                  <option value="unassigned">Unassigned</option>
                 </Select>
               </Field>
             );
