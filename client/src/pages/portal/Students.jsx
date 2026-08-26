@@ -213,7 +213,12 @@ export default function Students() {
         <Field label="Class shift (capacity-aware)">
           <Select value={sectionId} onChange={(e) => setSectionId(e.target.value)}>
             <option value="">Select…</option>
-            {sections.filter((s) => s.programId === assign?.programId).map((s) => (
+            {sections.filter((s) => {
+              if (s.programId !== assign?.programId) return false;
+              if (s.academicSessionId !== assign?.academicSessionId) return false;
+              if (assign?.classSection) return s.termNo === assign.classSection.termNo;
+              return s.termNo === 1;
+            }).map((s) => (
               <option key={s.id} value={s.id}>
                 {s.program.code} {termLabel(s.program.level, s.termNo)} — {s.shift} ({s._count.students}/{s.capacity ?? '∞'})
               </option>
