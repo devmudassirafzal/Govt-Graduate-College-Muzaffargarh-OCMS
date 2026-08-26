@@ -18,6 +18,7 @@ export default function Students() {
     programLevelId: '',
     programId: '',
     groupId: '',
+    shift: '',
     termNo: '',
     sessionId: ''
   });
@@ -39,6 +40,7 @@ export default function Students() {
         programLevelId: f.programLevelId || undefined,
         program: f.programId || undefined,
         groupId: f.groupId || undefined,
+        shift: f.shift || undefined,
         termNo: f.termNo || undefined,
         session: f.sessionId || undefined,
         page: p,
@@ -53,6 +55,7 @@ export default function Students() {
         programLevelId: form.programLevelId || undefined,
         program: form.programId || undefined,
         groupId: form.groupId || undefined,
+        shift: form.shift || undefined,
         termNo: form.termNo || undefined,
         session: form.sessionId || undefined,
         all: 1 
@@ -91,7 +94,7 @@ export default function Students() {
   const setF = (k) => (e) => {
     const v = e.target.value;
     const next = { ...form, [k]: v };
-    if (k === 'programLevelId') { next.programId = ''; next.groupId = ''; next.termNo = ''; }
+    if (k === 'programLevelId') { next.programId = ''; next.groupId = ''; next.shift = ''; next.termNo = ''; next.sessionId = ''; }
     setForm(next);
     load(next, 1);
   };
@@ -128,41 +131,62 @@ export default function Students() {
         
         {(() => {
           const lvl = programLevels.find(l => l.id === Number(form.programLevelId));
-          if (!lvl || lvl.prerequisiteType === 'matric_groups') return null;
-          const groups = lvl.prerequisiteType === 'inter_groups' ? interGroups : matricGroups;
-          return (
-            <Field label="Group / Specialization">
-              <Select value={form.groupId} onChange={setF('groupId')}>
-                <option value="">All Groups</option>
-                {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
-              </Select>
-            </Field>
-          );
+          if (!lvl) return null;
+          
+          if (lvl.prerequisiteType === 'matric_groups' || lvl.prerequisiteType === 'inter_groups') {
+            const groups = lvl.prerequisiteType === 'inter_groups' ? interGroups : matricGroups;
+            return (
+              <Field label="Group / Specialization">
+                <Select value={form.groupId} onChange={setF('groupId')}>
+                  <option value="">All Groups</option>
+                  {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
+                </Select>
+              </Field>
+            );
+          } else {
+            return (
+              <Field label="Shift">
+                <Select value={form.shift} onChange={setF('shift')}>
+                  <option value="">All Shifts</option>
+                  <option value="morning">Morning</option>
+                  <option value="evening">Evening</option>
+                </Select>
+              </Field>
+            );
+          }
         })()}
 
         {(() => {
           const lvl = programLevels.find(l => l.id === Number(form.programLevelId));
           if (!lvl) return null;
-          const label = lvl.defaultExamSystem === 'annual' ? 'Year' : 'Semester';
+          
+          let filterLabel = 'Term/Semester';
+          if (lvl.defaultExamSystem === 'annual' && lvl.name.toLowerCase().includes('intermediate')) {
+            filterLabel = 'Term/Year';
+          }
+          const itemLabel = lvl.defaultExamSystem === 'annual' ? 'Year' : 'Semester';
           const maxTerm = (lvl.cycleYears || 1) * (lvl.defaultExamSystem === 'annual' ? 1 : 2);
+          
           return (
-            <Field label="Term">
+            <Field label={filterLabel}>
               <Select value={form.termNo} onChange={setF('termNo')}>
                 <option value="">All Terms</option>
                 {Array.from({ length: maxTerm }, (_, i) => i + 1).map(n => (
-                  <option key={n} value={n}>{label} {n}</option>
+                  <option key={n} value={n}>{itemLabel} {n}</option>
                 ))}
               </Select>
             </Field>
           );
         })()}
 
-        <Field label="Admission Session">
-          <Select value={form.sessionId} onChange={setF('sessionId')}>
-            <option value="">All Sessions</option>
-            {sessions.map((s) => <option key={s.id} value={s.id}>{s.name} ({s.startYear}-{s.endYear})</option>)}
-          </Select>
-        </Field>
+        {!programLevels.find(l => l.id === Number(form.programLevelId)) && (
+          <Field label="Admission Session">
+            <Select value={form.sessionId} onChange={setF('sessionId')}>
+              <option value="">All Sessions</option>
+              {sessions.map((s) => <option key={s.id} value={s.id}>{s.name} ({s.startYear}-{s.endYear})</option>)}
+            </Select>
+          </Field>
+        )}
       </div>
 
       <Card>

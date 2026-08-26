@@ -106,6 +106,9 @@ class StudentController extends Controller
                   ->orWhere('matric_group_id', $request->groupId);
             });
         }
+        if ($request->filled('shift')) {
+            $q->whereHas('classSection', fn($w) => $w->where('shift', $request->shift));
+        }
         if ($request->filled('termNo')) {
             $q->whereHas('classSection', fn($w) => $w->where('term_no', $request->termNo));
         }
