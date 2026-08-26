@@ -282,6 +282,7 @@ class PublicController extends Controller
     {
         $cycles = AdmissionCycle::with(['academicSession', 'level'])
             ->where('status', 'open')
+            ->whereDate('end_at', '>=', \Carbon\Carbon::today())
             ->orderBy('program_level_id', 'desc')
             ->get();
             

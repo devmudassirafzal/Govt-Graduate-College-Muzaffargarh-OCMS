@@ -74,7 +74,10 @@ class AdmissionController extends Controller
 
     public function getWizardData(Request $request)
     {
-        $cycles = AdmissionCycle::with('academicSession')->where('status', 'open')->get();
+        $cycles = AdmissionCycle::with('academicSession')
+            ->where('status', 'open')
+            ->whereDate('end_at', '>=', \Carbon\Carbon::today())
+            ->get();
         $programs = Program::with('programEligibilities')->where('is_active', true)->orderBy('name', 'asc')->get();
         $interGroups = InterGroup::orderBy('name', 'asc')->get();
         $documentTypes = DocumentType::where('is_active', true)->get();
