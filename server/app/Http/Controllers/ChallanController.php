@@ -99,7 +99,9 @@ class ChallanController extends Controller
             $msg = isset($result['student']) ? "Enrolled with roll number {$result['student']->roll_number}." : 'Challan verified.';
             return response()->json(array_merge(['message' => $msg], $result));
         } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], $e->getCode() ?: 422);
+            $code = $e->getCode();
+            $status = (is_numeric($code) && (int)$code >= 100 && (int)$code <= 599) ? (int)$code : 422;
+            return response()->json(['message' => $e->getMessage()], $status);
         }
     }
 
@@ -112,7 +114,9 @@ class ChallanController extends Controller
             $challan = ChallanService::rejectChallan($id, $request->user()->id, $request->remarks);
             return response()->json(['challan' => $challan]);
         } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], $e->getCode() ?: 422);
+            $code = $e->getCode();
+            $status = (is_numeric($code) && (int)$code >= 100 && (int)$code <= 599) ? (int)$code : 422;
+            return response()->json(['message' => $e->getMessage()], $status);
         }
     }
 
