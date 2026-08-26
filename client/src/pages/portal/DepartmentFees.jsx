@@ -149,7 +149,30 @@ export default function DepartmentFees() {
         <Field label="Department">
           <Select value={departmentId} onChange={(e) => setDepartmentId(e.target.value)}>
             <option value="">Select a department…</option>
-            {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+            
+            <optgroup label="BS Programs (Departments)">
+              {departments
+                .filter(d => !d.name.includes('FSc') && !d.name.includes('ICS') && !d.name.includes('FA') && !d.name.includes('Diploma'))
+                .map((d) => (
+                  <option key={d.id} value={d.id}>{d.name}</option>
+              ))}
+            </optgroup>
+            
+            <optgroup label="Intermediate">
+              {departments
+                .filter(d => d.name.includes('FSc') || d.name === 'ICS' || d.name === 'FA')
+                .map((d) => (
+                  <option key={d.id} value={d.id}>{d.name}</option>
+              ))}
+            </optgroup>
+            
+            <optgroup label="Diplomas">
+              {departments
+                .filter(d => d.name.includes('Diploma'))
+                .map((d) => (
+                  <option key={d.id} value={d.id}>{d.name}</option>
+              ))}
+            </optgroup>
           </Select>
         </Field>
       </Card>
