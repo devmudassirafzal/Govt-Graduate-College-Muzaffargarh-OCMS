@@ -362,7 +362,11 @@ function CommitteesTab({ committees, teachers, flash, confirm, reload }) {
                   onChange={(e) => setSearchTeacher(e.target.value)} 
                 />
               </div>
-              <Select value={teacherId} onChange={(e) => setTeacherId(e.target.value)}>
+              <Select 
+                value={teacherId} 
+                onChange={(e) => setTeacherId(e.target.value)}
+                size={searchTeacher ? Math.min(6, teachers.filter(t => t.name.toLowerCase().includes(searchTeacher.toLowerCase())).length + 1) : undefined}
+              >
                 <option value="">Select a teacher…</option>
                 {teachers.filter(t => t.name.toLowerCase().includes(searchTeacher.toLowerCase())).map((t) => (
                   <option key={t.id} value={t.id}>{t.name} — {t.designation?.title} ({t.departmentName})</option>
