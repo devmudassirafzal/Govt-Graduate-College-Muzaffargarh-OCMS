@@ -49,10 +49,10 @@ class MeritService
         $program = Program::find($programId);
         if (!$cycle || !$program) throw new \Exception('Cycle or program not found.', 404);
 
-        $lastList = MeritList::where('cycle_id', $cycleId)->where('program_id', $programId)->orderBy('list_no', 'desc')->first();
+        $lastList = MeritList::where('admission_cycle_id', $cycleId)->where('program_id', $programId)->orderBy('list_no', 'desc')->first();
         $listNo = ($lastList->list_no ?? 0) + 1;
 
-        $pool = Application::where('cycle_id', $cycleId)
+        $pool = Application::where('admission_cycle_id', $cycleId)
             ->where('program_id', $programId)
             ->whereIn('status', ['verified', 'waitlisted'])
             ->get();
@@ -83,7 +83,7 @@ class MeritService
 
         return DB::transaction(function() use ($cycleId, $programId, $listNo, $seats, $userId, $scored) {
             $list = MeritList::create([
-                'cycle_id' => $cycleId,
+                'admission_cycle_id' => $cycleId,
                 'program_id' => $programId,
                 'list_no' => $listNo,
                 'seats' => $seats,
