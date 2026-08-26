@@ -179,6 +179,7 @@ function CommitteesTab({ committees, teachers, flash, confirm, reload }) {
   const [addTo, setAddTo] = useState(null); // committee receiving a member
   const [teacherId, setTeacherId] = useState('');
   const [position, setPosition] = useState('member');
+  const [searchTeacher, setSearchTeacher] = useState('');
   const [busy, setBusy] = useState(false);
 
   function openEdit(c) {
@@ -215,7 +216,7 @@ function CommitteesTab({ committees, teachers, flash, confirm, reload }) {
       setBusy(true);
       const r = await api.post(`/admin/committees/${addTo.id}/members`, { teacherId, position });
       flash({ type: 'ok', text: r.data.message });
-      setAddTo(null); setTeacherId(''); setPosition('member');
+      setAddTo(null); setTeacherId(''); setPosition('member'); setSearchTeacher('');
       reload();
     } catch (e) { flash({ type: 'error', text: errText(e) }); }
     finally { setBusy(false); }
@@ -226,9 +227,27 @@ function CommitteesTab({ committees, teachers, flash, confirm, reload }) {
       try {
         const r = await api.delete(`/admin/committees/${c.id}/members/${m.teacherId}`);
         flash({ type: 'ok', text: r.data.message });
+        if (edit?.id === c.id) {
+          setEdit({ ...edit, members: edit.members.filter((x) => x.teacherId !== m.teacherId) });
+        }
         reload();
       } catch (e) { flash({ type: 'error', text: errText(e) }); }
     });
+  }
+
+  async function changeRole(c, teacherId, newPosition) {
+    try {
+      await api.post(`/admin/committees/${c.id}/members`, { teacherId, position: newPosition });
+      flash({ type: 'ok', text: 'Role updated.' });
+      reload();
+      // the reload will fetch fresh data but the modal edit state won't instantly update unless we patch it
+      if (edit?.id === c.id) {
+        setEdit({
+          ...edit, 
+          members: edit.members.map(m => m.teacherId === teacherId ? { ...m, position: newPosition } : (newPosition === 'convener' && m.position === 'convener' ? { ...m, position: 'member' } : m))
+        });
+      }
+    } catch (e) { flash({ type: 'error', text: errText(e) }); }
   }
 
   return (
@@ -298,6 +317,35 @@ function CommitteesTab({ committees, teachers, flash, confirm, reload }) {
                 {busy ? 'Saving…' : edit.id ? 'Save changes' : 'Create committee'}
               </Button>
             </div>
+            
+            {edit.id && (
+              <div className="mt-6 border-t pt-4">
+                <h4 className="mb-3 text-sm font-semibold text-slate-800">Current Members</h4>
+                {edit.members?.length === 0 ? (
+                  <p className="text-sm text-slate-500">No members.</p>
+                ) : (
+                  <ul className="space-y-2">
+                    {[...(edit.members || [])].sort((a, b) => (POSITION_RANK[a.position] ?? 9) - (POSITION_RANK[b.position] ?? 9)).map((m) => (
+                      <li key={m.teacherId} className="flex items-center justify-between gap-2 rounded-md bg-slate-50 px-3 py-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-sm font-medium">{m.teacher?.name}</div>
+                        </div>
+                        <Select 
+                          className="!py-1 !text-xs w-28" 
+                          value={m.position} 
+                          onChange={(e) => changeRole(edit, m.teacherId, e.target.value)}
+                        >
+                          <option value="convener">Convener</option>
+                          <option value="secretary">Secretary</option>
+                          <option value="member">Member</option>
+                        </Select>
+                        <button className="ml-2 text-slate-400 hover:text-red-600" onClick={() => removeMember(edit, m)}>✕</button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
           </div>
         )}
       </Modal>
@@ -307,9 +355,16 @@ function CommitteesTab({ committees, teachers, flash, confirm, reload }) {
         {addTo && (
           <div className="space-y-3">
             <Field label="Teacher" hint="Teachers from every department can join a committee.">
+              <div className="mb-2">
+                <Input 
+                  placeholder="Search teacher by name..." 
+                  value={searchTeacher} 
+                  onChange={(e) => setSearchTeacher(e.target.value)} 
+                />
+              </div>
               <Select value={teacherId} onChange={(e) => setTeacherId(e.target.value)}>
                 <option value="">Select a teacher…</option>
-                {teachers.map((t) => (
+                {teachers.filter(t => t.name.toLowerCase().includes(searchTeacher.toLowerCase())).map((t) => (
                   <option key={t.id} value={t.id}>{t.name} — {t.designation?.title} ({t.departmentName})</option>
                 ))}
               </Select>
