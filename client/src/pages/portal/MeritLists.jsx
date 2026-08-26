@@ -25,9 +25,9 @@ export default function MeritLists() {
   useEffect(() => { load(); }, []);
 
   const cycle = cycles.find((c) => c.id === Number(form.cycleId));
-  const cyclePrograms = programs.filter((p) => p.level === cycle?.level && p.isActive);
+  const cyclePrograms = programs.filter((p) => p.programLevelId === cycle?.programLevelId && p.isActive);
   const closeCycle = cycles.find((c) => c.id === Number(closeForm.cycleId));
-  const closeCyclePrograms = programs.filter((p) => p.level === closeCycle?.level && p.isActive);
+  const closeCyclePrograms = programs.filter((p) => p.programLevelId === closeCycle?.programLevelId && p.isActive);
 
   async function generate() {
     try {
