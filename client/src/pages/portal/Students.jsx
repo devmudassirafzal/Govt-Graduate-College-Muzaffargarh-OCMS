@@ -133,28 +133,16 @@ export default function Students() {
           const lvl = programLevels.find(l => l.id === Number(form.programLevelId));
           if (!lvl) return null;
           
-          if (lvl.name === 'Intermediate' || lvl.name === 'Diploma') {
-            const groups = lvl.name === 'Intermediate' ? interGroups : matricGroups;
-            return (
-              <Field label="Group / Specialization">
-                <Select value={form.groupId} onChange={setF('groupId')}>
-                  <option value="">All Groups</option>
-                  {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
-                </Select>
-              </Field>
-            );
-          } else {
-            return (
-              <Field label="Shift">
-                <Select value={form.shift} onChange={setF('shift')}>
-                  <option value="">All Shifts</option>
-                  <option value="morning">Morning</option>
-                  <option value="evening">Evening</option>
-                  <option value="unassigned">Unassigned</option>
-                </Select>
-              </Field>
-            );
-          }
+          return (
+            <Field label="Shift">
+              <Select value={form.shift} onChange={setF('shift')}>
+                <option value="">All Shifts</option>
+                <option value="morning">Morning</option>
+                <option value="evening">Evening</option>
+                <option value="unassigned">Unassigned</option>
+              </Select>
+            </Field>
+          );
         })()}
 
         {(() => {
