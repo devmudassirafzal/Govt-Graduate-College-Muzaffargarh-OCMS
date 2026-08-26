@@ -80,12 +80,14 @@ class AdmissionController extends Controller
             ->get();
         $programs = Program::with('programEligibilities')->where('is_active', true)->orderBy('name', 'asc')->get();
         $interGroups = InterGroup::orderBy('name', 'asc')->get();
+        $matricGroups = \App\Models\MatricGroup::orderBy('name', 'asc')->get();
         $documentTypes = DocumentType::where('is_active', true)->get();
         $account = User::select('name', 'cnic', 'phone')->find($request->user()->id);
         $lastApplication = Application::where('user_id', $request->user()->id)->where('status', '!=', 'draft')->orderBy('id', 'desc')->first();
 
         return response()->json([
             'cycles' => $cycles, 'programs' => $programs, 'interGroups' => $interGroups,
+            'matricGroups' => $matricGroups,
             'documentTypes' => $documentTypes, 'account' => $account, 'lastApplication' => $lastApplication
         ]);
     }
@@ -102,7 +104,7 @@ class AdmissionController extends Controller
         if (Carbon::now() > $cycle->end_at) return response()->json(['message' => 'The application deadline for this cycle has passed.'], 422);
         if (Carbon::now() < $cycle->start_at) return response()->json(['message' => 'This admission cycle has not started accepting applications yet.'], 422);
 
-        $required = ['name', 'fatherName', 'cnicBform', 'gender', 'dob', 'province', 'domicile', 'religion', 'address', 'phone', 'guardianPhone', 'matricBoard', 'matricYear', 'matricRollNo', 'matricObtained', 'matricTotal'];
+        $required = ['name', 'fatherName', 'cnicBform', 'gender', 'dob', 'province', 'domicile', 'religion', 'address', 'phone', 'guardianPhone', 'matricGroupId', 'matricBoard', 'matricYear', 'matricRollNo', 'matricObtained', 'matricTotal'];
         if ($program->level->prerequisite_type === 'inter_groups') {
             array_push($required, 'interGroupId', 'interBoard', 'interYear', 'interRollNo', 'interObtained', 'interTotal');
         }
@@ -166,6 +168,7 @@ class AdmissionController extends Controller
             'is_hafiz' => ($b['religion'] === 'Islam' && !empty($b['isHafiz'])),
             'matric_board' => $b['matricBoard'], 'matric_year' => $matricYear, 'matric_roll_no' => (string)$b['matricRollNo'],
             'matric_obtained' => (int)$b['matricObtained'], 'matric_total' => (int)$b['matricTotal'],
+            'matric_group_id' => !empty($b['matricGroupId']) ? (int)$b['matricGroupId'] : null,
             'inter_group_id' => !empty($b['interGroupId']) ? (int)$b['interGroupId'] : null,
             'inter_board' => $b['interBoard'] ?? null, 'inter_year' => !empty($b['interYear']) ? (int)$b['interYear'] : null,
             'inter_roll_no' => $b['interRollNo'] ?? null,

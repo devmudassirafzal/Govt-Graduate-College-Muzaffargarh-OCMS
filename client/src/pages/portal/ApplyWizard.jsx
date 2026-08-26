@@ -433,6 +433,12 @@ export default function ApplyWizard() {
             <div>
               <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-accent">Matriculation</h3>
               <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Group">
+                  <Select value={form.matricGroupId ?? ''} onChange={set('matricGroupId')}>
+                    <option value="">Select…</option>
+                    {meta.matricGroups?.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
+                  </Select>
+                </Field>
                 <Field label="Board">
                   <Select value={form.matricBoard ?? ''} onChange={set('matricBoard')}>
                     <option value="">Select board…</option>
