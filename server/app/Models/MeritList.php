@@ -38,6 +38,8 @@ class MeritList extends Model
 
 	protected $table = 'merit_lists';
 
+	const UPDATED_AT = null;
+
 	protected $casts = [
 		'admission_cycle_id' => 'int',
 		'program_id' => 'int',
