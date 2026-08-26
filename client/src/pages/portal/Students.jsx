@@ -8,13 +8,19 @@ export default function Students() {
   const { can } = useAuth();
   const [students, setStudents] = useState(null);
   const [sections, setSections] = useState([]);
-  const [departments, setDepartments] = useState([]);
-  const [interPrograms, setInterPrograms] = useState([]); // intermediate offerings (no department)
   const [sessions, setSessions] = useState([]);
+  const [programLevels, setProgramLevels] = useState([]);
+  const [programs, setPrograms] = useState([]);
+  const [interGroups, setInterGroups] = useState([]);
+  const [matricGroups, setMatricGroups] = useState([]);
 
-  // '' | 'dept:<id>' (BS department) | 'prog:<id>' (intermediate program)
-  const [deptFilter, setDeptFilter] = useState('');
-  const [sessionId, setSessionId] = useState('');
+  const [form, setForm] = useState({
+    programLevelId: '',
+    programId: '',
+    groupId: '',
+    termNo: '',
+    sessionId: ''
+  });
   const [q, setQ] = useState('');
 
   const [assign, setAssign] = useState(null);
@@ -24,22 +30,17 @@ export default function Students() {
   const [meta, setMeta] = useState({ pages: 1, total: 0 });
   const [flash, flashEl] = useFlash();
 
-  // Intermediate students have no department, so the filter offers BS departments
-  // AND intermediate programs; each encodes which query param the API gets.
-  const filterParams = (f) => {
-    if (f.startsWith('dept:')) return { department: f.slice(5) };
-    if (f.startsWith('prog:')) return { program: f.slice(5) };
-    return {};
-  };
-
-  const load = (f = deptFilter, s = sessionId, p = 1) => {
+  const load = (f = form, p = 1) => {
     setStudents(null);
     setPage(p);
     api.get('/students', {
       params: {
         q: q.trim() || undefined,
-        ...filterParams(f),
-        session: s || undefined,
+        programLevelId: f.programLevelId || undefined,
+        program: f.programId || undefined,
+        groupId: f.groupId || undefined,
+        termNo: f.termNo || undefined,
+        session: f.sessionId || undefined,
         page: p,
       }
     }).then((r) => { setStudents(r.data.students); setMeta({ pages: r.data.pages, total: r.data.total }); });
@@ -47,7 +48,15 @@ export default function Students() {
 
   async function exportCsv() {
     const r = await api.get('/students', {
-      params: { q: q.trim() || undefined, ...filterParams(deptFilter), session: sessionId || undefined, all: 1 },
+      params: { 
+        q: q.trim() || undefined, 
+        programLevelId: form.programLevelId || undefined,
+        program: form.programId || undefined,
+        groupId: form.groupId || undefined,
+        termNo: form.termNo || undefined,
+        session: form.sessionId || undefined,
+        all: 1 
+      },
     });
     downloadCsv('students.csv', [
       { header: 'Roll No', value: (s) => s.rollNumber },
@@ -64,27 +73,27 @@ export default function Students() {
   useEffect(() => {
     load();
     api.get('/academic/sections').then((r) => setSections(r.data.sections));
-    api.get('/academic/departments').then((r) => setDepartments(r.data.departments));
-    api.get('/academic/programs').then((r) => setInterPrograms(r.data.programs.filter((p) => p.level === 'intermediate')));
     api.get('/academic/sessions').then((r) => setSessions(r.data.sessions));
+    api.get('/academic/program-levels').then((r) => setProgramLevels(r.data.levels));
+    api.get('/academic/programs').then((r) => setPrograms(r.data.programs));
+    api.get('/academic/inter-groups').then((r) => setInterGroups(r.data.interGroups));
+    api.get('/academic/matric-groups').then((r) => setMatricGroups(r.data.matricGroups));
   }, []);
 
   async function doAssign() {
     try {
       await api.put(`/students/${assign.id}/section`, { classSectionId: sectionId });
       flash({ type: 'ok', text: 'Class shift assigned.' });
-      setAssign(null); load();
+      setAssign(null); load(form, page);
     } catch (e) { flash({ type: 'error', text: errText(e) }); }
   }
 
-  const handleFilterChange = (type, val) => {
-    if (type === 'dept') {
-      setDeptFilter(val);
-      load(val, sessionId);
-    } else {
-      setSessionId(val);
-      load(deptFilter, val);
-    }
+  const setF = (k) => (e) => {
+    const v = e.target.value;
+    const next = { ...form, [k]: v };
+    if (k === 'programLevelId') { next.programId = ''; next.groupId = ''; next.termNo = ''; }
+    setForm(next);
+    load(next, 1);
   };
 
   return (
@@ -100,20 +109,56 @@ export default function Students() {
       </div>
 
       {/* Filters Bar */}
-      <div className="grid gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 md:grid-cols-3">
-        <Field label="Filter by Department / Program">
-          <Select value={deptFilter} onChange={(e) => handleFilterChange('dept', e.target.value)}>
-            <option value="">All Departments &amp; Programs</option>
-            <optgroup label="Departments (BS)">
-              {departments.map((d) => <option key={`dept-${d.id}`} value={`dept:${d.id}`}>{d.name} ({d.code})</option>)}
-            </optgroup>
-            <optgroup label="Intermediate Programs">
-              {interPrograms.map((p) => <option key={`prog-${p.id}`} value={`prog:${p.id}`}>{p.name} ({p.code})</option>)}
-            </optgroup>
+      <div className="grid gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-5">
+        <Field label="Program Level">
+          <Select value={form.programLevelId} onChange={setF('programLevelId')}>
+            <option value="">All Levels</option>
+            {programLevels.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
           </Select>
         </Field>
-        <Field label="Filter by Session">
-          <Select value={sessionId} onChange={(e) => handleFilterChange('session', e.target.value)}>
+        
+        <Field label="Program">
+          <Select value={form.programId} onChange={setF('programId')}>
+            <option value="">All Programs</option>
+            {programs.filter(p => !form.programLevelId || p.programLevelId === Number(form.programLevelId)).map((p) => (
+              <option key={p.id} value={p.id}>{p.name} ({p.code})</option>
+            ))}
+          </Select>
+        </Field>
+        
+        {(() => {
+          const lvl = programLevels.find(l => l.id === Number(form.programLevelId));
+          if (!lvl || lvl.prerequisiteType === 'matric_groups') return null;
+          const groups = lvl.prerequisiteType === 'inter_groups' ? interGroups : matricGroups;
+          return (
+            <Field label="Group / Specialization">
+              <Select value={form.groupId} onChange={setF('groupId')}>
+                <option value="">All Groups</option>
+                {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
+              </Select>
+            </Field>
+          );
+        })()}
+
+        {(() => {
+          const lvl = programLevels.find(l => l.id === Number(form.programLevelId));
+          if (!lvl) return null;
+          const label = lvl.defaultExamSystem === 'annual' ? 'Year' : 'Semester';
+          const maxTerm = (lvl.cycleYears || 1) * (lvl.defaultExamSystem === 'annual' ? 1 : 2);
+          return (
+            <Field label="Term">
+              <Select value={form.termNo} onChange={setF('termNo')}>
+                <option value="">All Terms</option>
+                {Array.from({ length: maxTerm }, (_, i) => i + 1).map(n => (
+                  <option key={n} value={n}>{label} {n}</option>
+                ))}
+              </Select>
+            </Field>
+          );
+        })()}
+
+        <Field label="Admission Session">
+          <Select value={form.sessionId} onChange={setF('sessionId')}>
             <option value="">All Sessions</option>
             {sessions.map((s) => <option key={s.id} value={s.id}>{s.name} ({s.startYear}-{s.endYear})</option>)}
           </Select>
@@ -145,7 +190,7 @@ export default function Students() {
           rows={students ?? []}
           empty={students === null ? 'Loading…' : 'No students found.'}
         />
-        <Pager page={page} pages={meta.pages} total={meta.total} onPage={(p) => load(deptFilter, sessionId, p)} />
+        <Pager page={page} pages={meta.pages} total={meta.total} onPage={(p) => load(form, p)} />
       </Card>
 
       {/* Assign Class Shift Modal */}

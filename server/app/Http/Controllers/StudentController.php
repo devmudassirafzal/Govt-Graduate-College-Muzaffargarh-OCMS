@@ -96,7 +96,19 @@ class StudentController extends Controller
                   ->orWhere('roll_number', 'like', '%' . $request->q . '%');
             });
         }
+        if ($request->filled('programLevelId')) {
+            $q->whereHas('program', fn($w) => $w->where('program_level_id', $request->programLevelId));
+        }
         if ($request->filled('program')) $q->where('program_id', $request->program);
+        if ($request->filled('groupId')) {
+            $q->where(function ($w) use ($request) {
+                $w->where('inter_group_id', $request->groupId)
+                  ->orWhere('matric_group_id', $request->groupId);
+            });
+        }
+        if ($request->filled('termNo')) {
+            $q->whereHas('classSection', fn($w) => $w->where('term_no', $request->termNo));
+        }
         if ($request->get('unassigned') === '1') $q->whereNull('class_section_id');
         if ($request->filled('department')) {
             $q->whereHas('program', fn($w) => $w->where('department_id', $request->department));
