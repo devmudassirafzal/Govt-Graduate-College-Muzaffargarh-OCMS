@@ -190,6 +190,7 @@ class ChallanService
                 'matric_year' => $app->matric_year,
                 'matric_obtained' => $app->matric_obtained,
                 'matric_total' => $app->matric_total,
+                'matric_group_id' => $app->matric_group_id,
                 'inter_group_id' => $app->inter_group_id,
                 'inter_board' => $app->inter_board,
                 'inter_year' => $app->inter_year,
