@@ -96,11 +96,11 @@ class AdmissionController extends Controller
 
         $cycle = AdmissionCycle::find($b['cycleId'] ?? 0);
         if (!$cycle || $cycle->status !== 'open') return response()->json(['message' => 'This admission cycle is not open.'], 422);
+        $program = Program::with('level')->find($b['programId'] ?? 0);
+        if (!$program || $program->program_level_id !== $cycle->program_level_id) return response()->json(['message' => 'Selected program does not belong to this admission cycle. Please click "Start over" to clear your old draft and select the correct cycle.'], 422);
+
         if (Carbon::now() > $cycle->end_at) return response()->json(['message' => 'The application deadline for this cycle has passed.'], 422);
         if (Carbon::now() < $cycle->start_at) return response()->json(['message' => 'This admission cycle has not started accepting applications yet.'], 422);
-
-        $program = Program::with('level')->find($b['programId'] ?? 0);
-        if (!$program || $program->program_level_id !== $cycle->program_level_id) return response()->json(['message' => 'Selected program does not belong to this admission cycle.'], 422);
 
         $required = ['name', 'fatherName', 'cnicBform', 'gender', 'dob', 'province', 'domicile', 'religion', 'address', 'phone', 'guardianPhone', 'matricBoard', 'matricYear', 'matricRollNo', 'matricObtained', 'matricTotal'];
         if ($program->level->prerequisite_type === 'inter_groups') {
@@ -156,7 +156,7 @@ class AdmissionController extends Controller
         if (!$check['eligible']) return response()->json(['message' => $check['reason'], 'ineligible' => true], 422);
 
         $data = [
-            'user_id' => $request->user()->id, 'cycle_id' => $cycle->id, 'program_id' => $program->id,
+            'user_id' => $request->user()->id, 'admission_cycle_id' => $cycle->id, 'program_id' => $program->id,
             'name' => $b['name'], 'father_name' => $b['fatherName'], 'cnic_bform' => $b['cnicBform'], 'gender' => $b['gender'],
             'dob' => $dob, 'province' => $b['province'], 'domicile' => $b['domicile'], 'address' => $b['address'],
             'phone' => $b['phone'], 'guardian_phone' => $b['guardianPhone'], 'religion' => $b['religion'],
@@ -173,7 +173,7 @@ class AdmissionController extends Controller
             'inter_total' => !empty($b['interTotal']) ? (int)$b['interTotal'] : null,
         ];
 
-        $existingDraft = Application::where('user_id', $request->user()->id)->where('cycle_id', $cycle->id)->where('program_id', $program->id)->where('status', 'draft')->first();
+        $existingDraft = Application::where('user_id', $request->user()->id)->where('admission_cycle_id', $cycle->id)->where('program_id', $program->id)->where('status', 'draft')->first();
         if ($existingDraft) {
             $existingDraft->update($data);
             return response()->json(['application' => $existingDraft]);
