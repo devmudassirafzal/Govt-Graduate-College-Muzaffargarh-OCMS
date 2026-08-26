@@ -50,7 +50,12 @@ export default function Academic() {
 
   function openEdit(modalName, item) {
     setEditItem(item);
-    setForm({ ...item });
+    const itemCopy = { ...item };
+    if (modalName === 'cycle') {
+      if (itemCopy.startAt) itemCopy.startAt = itemCopy.startAt.substring(0, 10);
+      if (itemCopy.endAt) itemCopy.endAt = itemCopy.endAt.substring(0, 10);
+    }
+    setForm(itemCopy);
     setModal(modalName);
   }
 

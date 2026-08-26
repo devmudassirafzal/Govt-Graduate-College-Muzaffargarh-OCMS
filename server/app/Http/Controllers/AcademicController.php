@@ -361,7 +361,16 @@ class AcademicController extends Controller
     {
         Gate::authorize('academic.manage');
         $cycle = AdmissionCycle::findOrFail($id);
-        $cycle->update($request->only(['title', 'start_at', 'end_at', 'status', 'merit_w_matric', 'merit_w_inter', 'hafiz_bonus', 'challan_due_days']));
+        $cycle->update([
+            'title' => $request->title,
+            'start_at' => $request->startAt,
+            'end_at' => $request->endAt,
+            'status' => $request->status,
+            'merit_w_matric' => $request->meritWMatric,
+            'merit_w_inter' => $request->meritWInter,
+            'hafiz_bonus' => $request->hafizBonus,
+            'challan_due_days' => $request->challanDueDays,
+        ]);
         return response()->json(['cycle' => $cycle]);
     }
 
