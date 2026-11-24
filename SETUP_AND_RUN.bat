@@ -277,9 +277,9 @@ $waited = 0
 while ((-not (Test-Port 5000) -or -not (Test-Port 5173)) -and $waited -lt 90) { Start-Sleep -Seconds 2; $waited += 2 }
 if ((Test-Port 5000) -and (Test-Port 5173)) { OK 'Both servers are up' } else { Warn 'Servers are still warming up - the browser tab may need a refresh.' }
 
-# -- 8. Open the website --------------------------------------------------------
-Step 8 'Opening the college website'
-Start-Process 'http://localhost:5173'
+# -- 8. Ready -------------------------------------------------------------------
+# (Automatic browser popup disabled so it does not open unwanted new tabs after startup)
+# Start-Process 'http://localhost:5173'
 
 Write-Host ''
 Line

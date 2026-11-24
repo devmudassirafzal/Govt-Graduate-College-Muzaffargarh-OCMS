@@ -19,6 +19,7 @@ const MENUS = {
   // Principal is now a customizable role. They only get menus based on the permissions granted
   // to them in the Admin portal, plus their personal tasks workspace.
   principal: [
+    ['Departments & Teachers', '/portal/departments'],
     ['My Tasks', '/portal/my-tasks'],
   ],
   clerk: [
@@ -33,6 +34,7 @@ const MENUS = {
     ['My Classes & Attendance', '/portal/my-classes'],
     ['Assessments & Marks', '/portal/assessments'],
     ['Quizzes & Assignments', '/portal/classwork'],
+    ['Question Papers', '/portal/question-papers'],
     ['Recorded Lectures', '/portal/lectures'],
     ['My Timetable', '/portal/my-timetable'],
     ['My Tasks', '/portal/my-tasks'],
@@ -58,6 +60,12 @@ const MENUS = {
     ['My Applications', '/portal/applications'],
     ['Apply Now', '/portal/apply'],
   ],
+  controller_examiner: [
+    ['Exams Hub', '/portal/examinations'],
+    ['Exam Rooms & Sheets', '/portal/examinations/allocations'],
+    ['Roll Number Slips', '/portal/examinations/slips'],
+    ['Question Papers', '/portal/examinations/papers'],
+  ],
 };
 
 // Management pages unlocked by module permissions — the same names the server's
@@ -76,6 +84,7 @@ const PERMISSION_MENU = [
   [['assets.manage'], 'College Assets', '/portal/assets'],
   [['tasks.manage'], 'Task Assignments', '/portal/tasks'],
   [['academic.view', 'academic.manage', 'departments.manage'], 'Academic Structure', '/portal/academic'],
+  [['examinations.manage'], 'Examinations Management', '/portal/examinations'],
   [['timetable.view', 'timetable.manage'], 'Timetable Builder', '/portal/timetable-builder'],
   [['timetable.view', 'timetable.manage'], 'Blocks & Rooms', '/portal/blocks'],
   [['timetable.view', 'timetable.manage'], 'Time Slots', '/portal/slots'],
@@ -94,9 +103,10 @@ function menuFor(user) {
   const has = (needs) => passesCan(user, needs);
 
   // priority: staff roles define the shell; extra roles append unique items
-  const order = ['admin', 'principal', 'clerk', 'hod', 'teacher', 'librarian', 'timetable', 'student', 'applicant'];
-  const items = [['Dashboard', '/portal']];
-  const seen = new Set(['/portal']);
+  const order = ['admin', 'principal', 'controller_examiner', 'clerk', 'hod', 'teacher', 'librarian', 'timetable', 'student', 'applicant'];
+  const isExclusivelyCE = user.roles.length === 1 && user.roles[0] === 'controller_examiner';
+  const items = isExclusivelyCE ? [] : [['Dashboard', '/portal']];
+  const seen = new Set(items.map(i => i[1]));
   const push = (label, to) => {
     if (seen.has(to)) return;
     seen.add(to);

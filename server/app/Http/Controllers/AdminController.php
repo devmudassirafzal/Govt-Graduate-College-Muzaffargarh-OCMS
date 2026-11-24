@@ -21,7 +21,7 @@ use App\Services\HodService;
 class AdminController extends Controller
 {
     private const SUPER_ROLES = ['admin'];
-    private const GRANTABLE_HINT = ['clerk', 'librarian', 'timetable', 'teacher', 'hod', 'student', 'principal'];
+    private const GRANTABLE_HINT = ['clerk', 'librarian', 'timetable', 'teacher', 'hod', 'student', 'principal', 'controller_examiner'];
     private const ROLE_DEFAULTS = [
         'admin' => ['*'],
         'principal' => ['*'],
@@ -30,6 +30,7 @@ class AdminController extends Controller
         'timetable' => ['timetable.manage'],
         'teacher' => ['attendance.mark', 'classwork.manage', 'assessments.manage', 'lectures.manage'],
         'hod' => ['academic.manage', 'teachers.view', 'attendance.view'],
+        'controller_examiner' => ['examinations.manage'],
         'student' => [],
         'applicant' => []
     ];
@@ -38,6 +39,13 @@ class AdminController extends Controller
         $roles = $request->user()->roles->pluck('name')->toArray();
         if (!in_array('admin', $roles)) {
             abort(403, 'Admin access required.');
+        }
+    }
+
+    private function adminOrPrincipal(Request $request) {
+        $roles = $request->user()->roles->pluck('name')->toArray();
+        if (!in_array('admin', $roles) && !in_array('principal', $roles)) {
+            abort(403, 'Admin or Principal access required.');
         }
     }
 
@@ -125,14 +133,14 @@ class AdminController extends Controller
     // ── Departments & HOD ──
     public function getDepartments(Request $request)
     {
-        Gate::authorize('admin');
+        $this->adminOrPrincipal($request);
         $deps = Department::with(['hod.designation', 'teachers.designation', 'teachers.committees.committee'])->withCount('programs')->orderBy('name', 'asc')->get();
         return response()->json(['departments' => $deps]);
     }
 
     public function updateDepartmentHod(Request $request, $id)
     {
-        Gate::authorize('admin');
+        $this->adminOrPrincipal($request);
         $dept = Department::with('hod')->findOrFail($id);
         $newHodId = $request->teacherId;
 
@@ -158,7 +166,7 @@ class AdminController extends Controller
     // ── Committees ──
     public function getCommittees(Request $request)
     {
-        Gate::authorize('admin');
+        Gate::authorize('committee.view');
         return response()->json([
             'committees' => Committee::with(['members.teacher.department', 'members.teacher.designation', 'studentMembers.student.program', 'studentMembers.student.classSection'])->orderBy('name', 'asc')->get()
         ]);
@@ -166,7 +174,7 @@ class AdminController extends Controller
 
     public function storeCommittee(Request $request)
     {
-        Gate::authorize('admin');
+        Gate::authorize('committee.manage');
         $request->validate(['name' => 'required|min:3']);
         $c = Committee::create(['name' => trim($request->name), 'description' => $request->description]);
         $c->load(['members.teacher.department', 'members.teacher.designation', 'studentMembers.student.program', 'studentMembers.student.classSection']);
@@ -175,7 +183,7 @@ class AdminController extends Controller
 
     public function updateCommittee(Request $request, $id)
     {
-        Gate::authorize('admin');
+        Gate::authorize('committee.manage');
         $c = Committee::findOrFail($id);
         $c->update(['name' => trim($request->name ?? $c->name), 'description' => $request->description ?? $c->description]);
         $c->load(['members.teacher.department', 'members.teacher.designation', 'studentMembers.student.program', 'studentMembers.student.classSection']);
@@ -184,7 +192,7 @@ class AdminController extends Controller
 
     public function deleteCommittee($id)
     {
-        Gate::authorize('admin');
+        Gate::authorize('committee.manage');
         $c = Committee::findOrFail($id);
         $name = $c->name;
         $c->delete();
@@ -193,7 +201,7 @@ class AdminController extends Controller
 
     public function addCommitteeMember(Request $request, $id)
     {
-        Gate::authorize('admin');
+        Gate::authorize('committee.manage');
         $pos = $request->position ?? 'member';
         if (!in_array($pos, ['convener', 'secretary', 'member'])) return response()->json(['message' => 'Invalid position'], 422);
         
@@ -214,14 +222,14 @@ class AdminController extends Controller
 
     public function removeCommitteeMember($id, $teacherId)
     {
-        Gate::authorize('admin');
+        Gate::authorize('committee.manage');
         CommitteeMember::where('committee_id', $id)->where('teacher_id', $teacherId)->delete();
         return response()->json(['message' => 'Member removed from the committee.']);
     }
 
     public function addCommitteeStudentMember(Request $request, $id)
     {
-        Gate::authorize('admin');
+        Gate::authorize('committee.manage');
         $pos = $request->position ?? 'member';
         $c = Committee::findOrFail($id);
         $s = \App\Models\Student::findOrFail($request->studentId);
@@ -237,7 +245,7 @@ class AdminController extends Controller
 
     public function removeCommitteeStudentMember($id, $studentId)
     {
-        Gate::authorize('admin');
+        Gate::authorize('committee.manage');
         CommitteeStudentMember::where('committee_id', $id)->where('student_id', $studentId)->delete();
         return response()->json(['message' => 'Student removed from the committee.']);
     }
@@ -259,10 +267,9 @@ class AdminController extends Controller
         $p = Permission::where('name', $request->permission)->firstOrFail();
         $expires = $request->expiresAt ? \Carbon\Carbon::parse($request->expiresAt) : null;
 
-        UserHasPermission::updateOrCreate(
-            ['user_id' => $user->id, 'permission_id' => $p->id],
-            ['expires_at' => $expires]
-        );
+        $user->permissions()->syncWithoutDetaching([
+            $p->id => ['expires_at' => $expires]
+        ]);
         
         \App\Models\Notification::create([
             'user_id' => $user->id,
@@ -304,10 +311,12 @@ class AdminController extends Controller
             foreach ($request->userIds as $uid) {
                 // Prevent self-modification
                 if ($uid != $request->user()->id) {
-                    UserHasPermission::updateOrCreate(
-                        ['user_id' => $uid, 'permission_id' => $p->id],
-                        ['expires_at' => $expires]
-                    );
+                    $uObj = User::find($uid);
+                    if ($uObj) {
+                        $uObj->permissions()->syncWithoutDetaching([
+                            $p->id => ['expires_at' => $expires]
+                        ]);
+                    }
                     \App\Models\Notification::create([
                         'user_id' => $uid,
                         'type' => 'permission',

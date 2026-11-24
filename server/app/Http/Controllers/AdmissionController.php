@@ -50,8 +50,8 @@ class AdmissionController extends Controller
 
     private function nextAppNo()
     {
-        $count = Application::count();
-        return "APP-" . date('Y') . "-" . str_pad($count + 1, 6, '0', STR_PAD_LEFT);
+        $maxId = Application::max('id') ?? 0;
+        return "APP-" . date('Y') . "-" . str_pad($maxId + 1, 6, '0', STR_PAD_LEFT);
     }
 
     // ── Applicant side ──

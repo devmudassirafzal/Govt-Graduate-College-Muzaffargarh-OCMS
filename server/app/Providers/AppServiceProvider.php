@@ -31,7 +31,11 @@ class AppServiceProvider extends ServiceProvider
                 return $r->permissions->pluck('name');
             })->toArray();
             
-            $directPermissions = $user->permissions->pluck('name')->toArray();
+            $activeDirect = $user->permissions->filter(function($p) {
+                return !$p->pivot->expires_at || \Carbon\Carbon::parse($p->pivot->expires_at)->isFuture();
+            });
+
+            $directPermissions = $activeDirect->pluck('name')->toArray();
             $allPermissions = array_values(array_unique(array_merge($rolePermissions, $directPermissions)));
 
             if (in_array($ability, $allPermissions)) {

@@ -8,8 +8,9 @@ export default defineConfig({
   server: {
     port: Number(process.env.PORT) || 5173,
     proxy: {
-      '/api': 'http://localhost:5000',
-      '/uploads': 'http://localhost:5000',
+      '/api': 'http://127.0.0.1:5000',
+      '/uploads': 'http://127.0.0.1:5000',
+      '/storage': 'http://127.0.0.1:5000',
     },
   },
 })

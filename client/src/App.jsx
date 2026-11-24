@@ -32,10 +32,17 @@ import Teachers from './pages/portal/Teachers';
 import Academic from './pages/portal/Academic';
 import NoticesManage from './pages/portal/NoticesManage';
 import Settings from './pages/portal/Settings';
+
+import ExaminerDashboard from './pages/portal/examiner/ExaminerDashboard';
+import ExaminerAllocations from './pages/portal/examiner/ExaminerAllocations';
+import ExaminerSlips from './pages/portal/examiner/ExaminerSlips';
+import ExaminerPapers from './pages/portal/examiner/ExaminerPapers';
+
 import Website from './pages/portal/Website';
 import MyClasses from './pages/portal/MyClasses';
 import Assessments from './pages/portal/Assessments';
 import TeacherClasswork from './pages/portal/TeacherClasswork';
+import TeacherQuestionPapers from './pages/portal/TeacherQuestionPapers';
 import TeacherLectures from './pages/portal/TeacherLectures';
 import StudentLectures from './pages/portal/StudentLectures';
 import { useAuth } from './context/AuthContext';
@@ -130,12 +137,18 @@ export default function App() {
             <Route path="notices" element={<PermissionRoute anyOf={['notices.view']}><NoticesManage /></PermissionRoute>} />
             <Route path="website" element={<PermissionRoute anyOf={['website.view', 'website.manage']}><Website /></PermissionRoute>} />
             <Route path="settings" element={<PermissionRoute anyOf={['settings.view']}><Settings /></PermissionRoute>} />
+            {/* Examinations (CE) */}
+            <Route path="examinations" element={<PermissionRoute anyOf={['examinations.manage']}><ExaminerDashboard /></PermissionRoute>} />
+            <Route path="examinations/allocations" element={<PermissionRoute anyOf={['examinations.manage']}><ExaminerAllocations /></PermissionRoute>} />
+            <Route path="examinations/slips" element={<PermissionRoute anyOf={['examinations.manage']}><ExaminerSlips /></PermissionRoute>} />
+            <Route path="examinations/papers" element={<PermissionRoute anyOf={['examinations.manage']}><ExaminerPapers /></PermissionRoute>} />
             {/* HOD */}
             <Route path="my-department" element={<HodDepartment />} />
             {/* Teacher */}
             <Route path="my-classes" element={<MyClasses />} />
             <Route path="assessments" element={<Assessments />} />
             <Route path="classwork" element={<TeacherClasswork />} />
+            <Route path="question-papers" element={<TeacherQuestionPapers />} />
             {/* One path, two screens: teachers post lectures, students watch them. */}
             <Route path="lectures" element={<LecturesRoute />} />
             <Route path="my-timetable" element={<MyTimetable kind="teacher" />} />

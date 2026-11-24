@@ -154,7 +154,7 @@ class PublicController extends Controller
     {
         $d = Department::with([
             'hod.designation',
-            'programs' => fn($q) => $q->where('is_active', true)->orderBy('level', 'desc')->orderBy('name', 'asc'),
+            'programs' => fn($q) => $q->with('level')->where('is_active', true)->orderBy('program_level_id', 'desc')->orderBy('name', 'asc'),
             'galleryImages' => fn($q) => $q->orderBy('sort_order', 'asc')->orderBy('id', 'asc')
         ])
         ->withCount(['teachers' => fn($q) => $q->where('status', 'active')])

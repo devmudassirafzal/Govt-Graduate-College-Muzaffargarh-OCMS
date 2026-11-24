@@ -44,7 +44,7 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
-            'role' => 'nullable|string|in:admin,principal,clerk,teacher,student,librarian,timetable,applicant',
+            'role' => 'nullable|string|in:admin,principal,clerk,teacher,student,librarian,timetable,applicant,controller_examiner',
         ]);
 
         $failKey = 'login:'.$request->ip().':'.$request->email;

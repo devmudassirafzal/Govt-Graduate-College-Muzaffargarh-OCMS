@@ -44,7 +44,9 @@ class CamelCaseJsonResponse
                 continue;
             }
 
-            $camelKey = is_string($key) ? Str::camel($key) : $key;
+            // Preserve dotted setting/config keys (e.g. 'site.mission_image', 'site.college_name_ur')
+            // as-is so frontend lookups like settings['site.mission_image'] match the DB key.
+            $camelKey = (is_string($key) && !str_contains($key, '.')) ? Str::camel($key) : $key;
             
             if (is_array($value)) {
                 $result[$camelKey] = $this->camelCaseArrayKeys($value);

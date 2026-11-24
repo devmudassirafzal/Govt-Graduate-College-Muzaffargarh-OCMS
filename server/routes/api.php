@@ -369,7 +369,42 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/gallery/{id}', [\App\Http\Controllers\SettingController::class, 'updateGallery']);
         Route::delete('/gallery/{id}', [\App\Http\Controllers\SettingController::class, 'destroyGallery']);
     });
+    // Teacher Examination Routes
+    Route::prefix('teacher/exams')->group(function () {
+        Route::get('/active', [\App\Http\Controllers\TeacherExamController::class, 'getActiveExams']);
+        Route::get('/papers', [\App\Http\Controllers\TeacherExamController::class, 'getMyPapers']);
+        Route::post('/papers', [\App\Http\Controllers\TeacherExamController::class, 'createPaper']);
+        Route::put('/papers/{id}/submit', [\App\Http\Controllers\TeacherExamController::class, 'submitPaper']);
+        Route::delete('/papers/{id}', [\App\Http\Controllers\TeacherExamController::class, 'deletePaper']);
+    });
+    
+    // Teacher subjects route
+    Route::get('/teacher/subjects', [\App\Http\Controllers\TeacherExamController::class, 'getMySubjects']);
+
+    // Controller Examiner Routes
+    Route::prefix('examiner')->group(function () {
+        // Exams
+        Route::get('/exams', [\App\Http\Controllers\ControllerExaminerController::class, 'getExams']);
+        Route::post('/exams', [\App\Http\Controllers\ControllerExaminerController::class, 'createExam']);
+        Route::put('/exams/{id}', [\App\Http\Controllers\ControllerExaminerController::class, 'updateExam']);
+        Route::delete('/exams/{id}', [\App\Http\Controllers\ControllerExaminerController::class, 'deleteExam']);
+        Route::put('/exams/{id}/toggle', [\App\Http\Controllers\ControllerExaminerController::class, 'toggleExamStatus']);
+        
+        // Question Papers
+        Route::get('/papers/submitted', [\App\Http\Controllers\ControllerExaminerController::class, 'getSubmittedPapers']);
+        Route::put('/papers/{id}/printed', [\App\Http\Controllers\ControllerExaminerController::class, 'markPaperPrinted']);
+
+        // Allocations
+        Route::get('/exams/{examId}/allocations', [\App\Http\Controllers\ControllerExaminerController::class, 'getAllocations']);
+        Route::post('/exams/{examId}/allocations', [\App\Http\Controllers\ControllerExaminerController::class, 'createAllocation']);
+
+        // Slips & Fines
+        Route::get('/exams/{examId}/students', [\App\Http\Controllers\ControllerExaminerController::class, 'getStudentsForSlips']);
+        Route::post('/exams/{examId}/slips', [\App\Http\Controllers\ControllerExaminerController::class, 'generateSlip']);
+        Route::post('/students/notify-unpaid', [\App\Http\Controllers\ControllerExaminerController::class, 'notifyUnpaid']);
+    });
 });
+
 
 // Standalone public setting route
 Route::get('/settings/public', [\App\Http\Controllers\SettingController::class, 'getPublic']);

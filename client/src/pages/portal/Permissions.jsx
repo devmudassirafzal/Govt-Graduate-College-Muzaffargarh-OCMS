@@ -18,11 +18,13 @@ const GROUP_LABEL = {
   website: 'Website content',
   settings: 'System settings',
   staff: 'Staff accounts',
+  examinations: 'Examinations',
 };
 
 const ROLE_NOTES = {
   admin: 'Full system control — passes every permission check, manages this page.',
   principal: 'Oversees academic activities. Granted full module permissions by default, but these can be revoked.',
+  controller_examiner: 'Exam allotments, slips, question papers.',
   hod: 'Granted automatically with a HOD nomination: own department page, gallery, students.',
   teacher: 'Own classes: attendance, assessments & marks, classwork, timetable, profile.',
   student: 'Own records: attendance, marks, classwork, challans, library, student card.',

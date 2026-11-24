@@ -79,6 +79,11 @@ export default function ApplyWizard() {
         return next;
       });
     });
+  }, [preselectCycle]);
+
+  // Restore saved draft once user is authenticated
+  useEffect(() => {
+    if (!user?.id || restored) return;
     try {
       const saved = JSON.parse(localStorage.getItem(draftKey) || 'null');
       if (saved?.form && Object.keys(saved.form).length > 2) {
@@ -87,12 +92,14 @@ export default function ApplyWizard() {
         setRestored(true);
       }
     } catch { /* corrupt draft — start fresh */ }
-  }, []);
+  }, [user?.id, draftKey, restored]);
 
   // Keep the draft saved on every change so an interrupted application survives.
   useEffect(() => {
-    if (meta) localStorage.setItem(draftKey, JSON.stringify({ form, step: Math.min(step, 3) }));
-  }, [form, step, meta]);
+    if (meta && user?.id) {
+      localStorage.setItem(draftKey, JSON.stringify({ form, step: Math.min(step, 3) }));
+    }
+  }, [form, step, meta, user?.id, draftKey]);
 
   // Fetch a small preview for each already-uploaded image document (once per
   // type) — PDFs get a generic icon instead, no point fetching those.

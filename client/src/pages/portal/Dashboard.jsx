@@ -10,8 +10,14 @@ export default function Dashboard() {
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
+    if (user.roles.length === 1 && user.roles[0] === 'controller_examiner') {
+      navigate('/portal/examinations', { replace: true });
+      return;
+    }
     api.get('/dashboard').then((res) => setStats(res.data.stats)).catch(() => setStats({}));
-  }, []);
+  }, [user.roles, navigate]);
+
+  if (user.roles.length === 1 && user.roles[0] === 'controller_examiner') return null;
 
   if (!stats) return <div className="py-20 text-center text-slate-400">Loading…</div>;
   const roles = user.roles;

@@ -61,6 +61,13 @@ const ROLES = [
     tagline: 'Full system control, audit & permissions',
     accent: 'border-slate-400 bg-slate-100 text-slate-800',
   },
+  {
+    key: 'controller_examiner',
+    label: 'Controller Examiner',
+    icon: '📑',
+    tagline: 'Exam allotments, slips & question papers',
+    accent: 'border-pink-300 bg-pink-50 text-pink-800',
+  },
 ];
 
 export default function Login() {
